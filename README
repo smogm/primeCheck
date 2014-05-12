@@ -1,0 +1,11 @@
+usage:
+
+make sure you have cmake, make and gcc >= 4.8 installed!
+
+mkdir build
+cd build
+cmake ..
+make
+
+example usage of resulting binary:
+../bin/primecheck 99991
