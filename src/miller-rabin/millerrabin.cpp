@@ -30,16 +30,17 @@ MillerRabin::~MillerRabin()
 
 unsigned long MillerRabin::expModulo(unsigned long base, unsigned long power, unsigned long modulus) {
 	unsigned long result = 1;
-	int i;
 
-	for (i=15; i>=0; i--) {
+	for (int i=15; i>=0; i--)
+	{
 		result = (result*result) % modulus;
-		if (power & (1 << i)) {
+		if (power & (1 << i))
+		{
 			result = (result*base) % modulus;
 		}
 	}
 
-	return (unsigned long)result; /* Will not truncate since modulus is a u16 */
+	return result;
 }
 
 void MillerRabin::pass(unsigned long base)
@@ -47,7 +48,8 @@ void MillerRabin::pass(unsigned long base)
 	unsigned long a_to_power, s, d, i;
 	s = 0;
 	d = mPPrime - 1;
-	while ((d % 2) == 0) {
+	while ((d % 2) == 0)
+	{
 		d /= 2;
 		s++;
 	}
