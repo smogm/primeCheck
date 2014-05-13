@@ -88,7 +88,7 @@ void MillerRabin::printPrimes() const
 	{
 		printf("%lu\tis probably prime\n", prime);
 	}
-	std::cout << "calculation took " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " µs" << std::endl;
+	std::cout << "MillerRabin took " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " µs" << std::endl;
 }
 
 void MillerRabin::calcPrimes()
