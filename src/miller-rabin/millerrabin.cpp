@@ -2,8 +2,8 @@
 
 #include <millerrabin.hpp>
 
-const int NUM_BASES = 14;
-const unsigned int base[NUM_BASES] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43 };
+static const int NUM_BASES = 14;
+static const unsigned int base[NUM_BASES] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43 };
 
 MillerRabin::MillerRabin(unsigned long n) :
 	mIsValid(false),
