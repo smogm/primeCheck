@@ -2,11 +2,14 @@
 #define BASEPRIME_HPP
 
 #include <chrono>
+#include <thread>
 
 class BasePrime
 {
 	protected:
 		std::chrono::steady_clock::time_point start, end;
+
+		unsigned int getCoreCount() const { return std::thread::hardware_concurrency(); }
 	public:
 			BasePrime() : start(), end() {};
 			virtual ~BasePrime() {};

@@ -11,6 +11,7 @@ MillerRabin::MillerRabin(unsigned long n) :
 	mPrimeListMutex(),
 	mPrimeList()
 {
+	std::cout << "available cores for concurrent jobs: " << getCoreCount() << std::endl;
 	// nothing to do yet?
 	if (n > 2)
 	{
