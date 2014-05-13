@@ -88,7 +88,14 @@ void MillerRabin::printPrimes() const
 	{
 		printf("%lu\tis probably prime\n", prime);
 	}
-	std::cout << "MillerRabin took " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " µs" << std::endl;
+	std::cout << "found " << mPrimeList.size() << " probably prime numbers." << std::endl;
+	std::cout << "checked with prime bases: ";
+	for (auto a : base)
+	{
+		printf("%u ", a);
+	}
+	std::cout << std::endl;
+	std::cout << "MillerRabin took " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " µs." << std::endl;
 }
 
 void MillerRabin::calcPrimes()
