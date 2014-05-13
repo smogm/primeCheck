@@ -86,16 +86,26 @@ void MillerRabin::printPrimes() const
 {
 	for (auto prime : mPrimeList)
 	{
-		printf("%lu\tis probably prime\n", prime);
+		std::cout << prime << "\tis probably prime" << std::endl;
 	}
-	std::cout << "found " << mPrimeList.size() << " probably prime numbers." << std::endl;
+
+	// print bases
 	std::cout << "checked with prime bases: ";
 	for (auto a : base)
 	{
-		printf("%u ", a);
+		std::cout << std::dec << a << " ";
 	}
 	std::cout << std::endl;
-	std::cout << "MillerRabin took " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " µs." << std::endl;
+}
+
+void MillerRabin::printCount() const
+{
+	std::cout << "found " << mPrimeList.size() << " probably prime numbers." << std::endl;
+}
+
+void MillerRabin::printTime() const
+{
+	std::cout << "MillerRabin took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms." << std::endl;
 }
 
 void MillerRabin::calcPrimes()
@@ -130,6 +140,5 @@ void MillerRabin::calcPrimes()
 			}
 		}
 	}
-
 	end = std::chrono::steady_clock::now();
 }

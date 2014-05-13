@@ -24,8 +24,11 @@ class MillerRabin final : public BasePrime
 			virtual ~MillerRabin();
 
 			virtual explicit operator bool() const;
-			virtual void printPrimes() const;
 			virtual void calcPrimes();
+
+			virtual void printPrimes() const;
+			virtual void printCount() const;
+			virtual void printTime() const;
 };
 
 #endif

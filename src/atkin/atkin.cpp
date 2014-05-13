@@ -40,7 +40,7 @@ void calcPrimes() { // interface method 1
 			}
 		}
 	}
-	
+
 	for(unsigned int n=5; n<LIMITSQRT; n++) {
 		if(primes[n]) {
 			for(unsigned long i=0, j=1; i<LIMIT; i=(j*pow(n, 2.0)), j++) {
