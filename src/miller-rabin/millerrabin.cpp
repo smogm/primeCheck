@@ -1,26 +1,20 @@
-#if defined(DEBUG)
 #include <iostream>
-#endif
 
 #include <millerrabin.hpp>
 
-const unsigned int base[] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43 };
+const int NUM_BASES = 14;
+const unsigned int base[NUM_BASES] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43 };
 
 MillerRabin::MillerRabin(unsigned long n) :
-	mIsPrime(false),
-	mPPrime(n)
+	mIsValid(false),
+	mCheckLimit(n),
+	mPrimeListMutex(),
+	mPrimeList()
 {
-	// first check if n is odd
-	if ((mPPrime & 1) == 1)
+	// nothing to do yet?
+	if (n > 2)
 	{
-		for (int i = 0; i < 14; i++)
-		{
-			pass(base[i]); // start to parallelize here!
-		}
-	}
-	else if (mPPrime == 2) // the only even prime number is 2
-	{
-		mIsPrime = true;
+		mIsValid = true; // object created correctly
 	}
 }
 
@@ -28,7 +22,8 @@ MillerRabin::~MillerRabin()
 {
 }
 
-unsigned long MillerRabin::expModulo(unsigned long base, unsigned long power, unsigned long modulus) {
+unsigned long MillerRabin::expModulo(const unsigned long base, const unsigned long power, const unsigned long modulus) const
+{
 	unsigned long result = 1;
 
 	for (int i=15; i>=0; i--)
@@ -43,11 +38,11 @@ unsigned long MillerRabin::expModulo(unsigned long base, unsigned long power, un
 	return result;
 }
 
-void MillerRabin::pass(unsigned long base)
+bool MillerRabin::check(const unsigned long base, const unsigned long pprime) const
 {
-	unsigned long a_to_power, s, d, i;
+	unsigned long a, s, d, i;
 	s = 0;
-	d = mPPrime - 1;
+	d = pprime - 1;
 	while ((d % 2) == 0)
 	{
 		d /= 2;
@@ -60,31 +55,74 @@ void MillerRabin::pass(unsigned long base)
 	std::cout << "d: " << std::dec << d << std::endl;
 #endif
 
-	a_to_power = expModulo(base, d, mPPrime);
-	if (a_to_power == 1)
+	a = expModulo(base, d, pprime);
+	if (a == 1)
 	{
-		mIsPrime = true;
-		return;
+		return true;
 	}
 
 	for(i=0; i < s-1; i++) {
-		if (a_to_power == mPPrime-1)
+		if (a == pprime-1)
 		{
-			mIsPrime = true;
-			return;
+			return true;
 		}
-		a_to_power = expModulo(a_to_power, 2, mPPrime);
+		a = expModulo(a, 2, pprime);
 	}
 
-	if (a_to_power == mPPrime-1)
+	if (a == pprime-1)
 	{
-		mIsPrime = true;
+		return true;
 	}
 
-	return;
+	return false;
 }
 
 MillerRabin::operator bool() const
 {
-	return mIsPrime;
+	return mIsValid;
+}
+
+void MillerRabin::printPrimes() const
+{
+	for (auto prime : mPrimeList)
+	{
+		printf("%lu\tis probably prime\n", prime);
+	}
+	std::cout << "calculation took " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " µs" << std::endl;
+}
+
+void MillerRabin::calcPrimes()
+{
+	bool isPrime = false;
+	int i = 0;
+	mPrimeList.clear();
+	mPrimeList.push_back(1);
+	mPrimeList.push_back(2);
+
+	start = std::chrono::steady_clock::now();
+	for (unsigned long n = 3; n <= mCheckLimit; n++)
+	{
+		// first check if n is odd
+		if ((n & 1) == 1)
+		{
+			isPrime = false;
+			i = 0;
+
+			// iterate the bases
+			do
+			{
+				isPrime = check(base[i++], n);
+			} while (i < NUM_BASES && isPrime);
+
+			if (isPrime) // n passed the check
+			{
+				// lock for thread safety
+				mPrimeListMutex.lock();
+				mPrimeList.push_back(n);
+				mPrimeListMutex.unlock();
+			}
+		}
+	}
+
+	end = std::chrono::steady_clock::now();
 }

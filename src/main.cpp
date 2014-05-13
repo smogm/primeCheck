@@ -11,18 +11,13 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
+	// get the upper limit for prime checking:
 	unsigned long n = atol(argv[1]);
 
 	// example use case:
-	BasePrime* primeCheck = new MillerRabin(n);
-	if (*primeCheck)
-	{
-		std::cout << "is prime" << std::endl;
-		return 0;
-	}
+	MillerRabin mr(n);
+	mr.calcPrimes();
+	mr.printPrimes();
 
-	delete primeCheck;
-
-	std::cout << "is NOT prime!" << std::endl;
-	return 1;
+	return 0;
 }
