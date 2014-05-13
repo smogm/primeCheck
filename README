@@ -1,3 +1,6 @@
+CLONE THIS GIT:
+git clone https://github.com/smogm/primeCheck.git
+
 HOW TO BUILD:
 make sure you have cmake, make and gcc >= 4.8 installed!
 
@@ -8,9 +11,6 @@ make
 
 USAGE:
 ../bin/primecheck [OPTIONS] UPPER_LIMIT
-
-CLONE THIS GIT:
-https://github.com/smogm/primeCheck.git
 
 COMMIT CHANGES:
 git add relative/path/to/changed/file
