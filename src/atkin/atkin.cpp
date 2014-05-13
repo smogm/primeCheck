@@ -1,67 +1,78 @@
-#include <stdio.h>
+#include <iostream>
 #include <limits.h>
-#include <stdbool.h>
 #include <math.h> 
 
 #include <atkin.hpp>
 
-// TODO build class (see atkin.hpp)
 // TODO check for performance issues
 
-#define LIMIT 2500 //ULLONG_MAX
-#define LIMITSQRT 50 // ULONG_MAX
-
-bool primes[LIMIT];
-
-void initPrimes() { // TODO move to c'tor
-	for(unsigned long i=0; i<LIMIT; i++) {
+Atkin::Atkin(unsigned long upperLimit)
+    : primes(NULL)
+    , upperLimit(upperLimit)
+{
+    primes = new bool[upperLimit];
+	for(unsigned long i=0; i<upperLimit; i++) {
 		primes[i] = false;
 	}
 }
 
-void calcPrimes() { // interface method 1
+Atkin::~Atkin(){
+    delete[] primes;
+    primes = NULL;
+}
+    
+void Atkin::calcPrimes() {
+    const unsigned long sqrtLimit = static_cast<unsigned long>(sqrt(upperLimit));
 	unsigned long n = 0;
-	for(unsigned int x=0; x<LIMITSQRT; x++) {
-		for(unsigned int y=0; y<LIMITSQRT; y++) {
+	for(unsigned int x=0; x<sqrtLimit; x++) {
+		for(unsigned int y=0; y<sqrtLimit; y++) {
 			n = 4*x*x+y*y;
-			if (n < LIMIT && (n%12 == 1 || n%12 == 5)) {
+			if (n < upperLimit && (n%12 == 1 || n%12 == 5)) {
 				primes[n] = !primes[n];
 			}
 			
 			n = 3*x*x+y*y;
-			if (n < LIMIT && n%12 == 7) {
+			if (n < upperLimit && n%12 == 7) {
 				primes[n] = !primes[n];
 			}
 			
 			
 			n = 3*x*x-y*y;
-			if (x > y && n < LIMIT && n%12 == 11) {
+			if (x > y && n < upperLimit && n%12 == 11) {
 				primes[n] = !primes[n];
 			}
 		}
 	}
 
-	for(unsigned int n=5; n<LIMITSQRT; n++) {
+	for(unsigned int n=5; n<sqrtLimit; n++) {
 		if(primes[n]) {
-			for(unsigned long i=0, j=1; i<LIMIT; i=(j*pow(n, 2.0)), j++) {
+			for(unsigned long i=0, j=1; i<upperLimit; i=(j*pow(n, 2.0)), j++) {
 				primes[i] = false;
 			}
 		}
 	}
 }
 
-void printPrimes() { // interface method 2
-	printf("%i %i ", 2, 3);
-	for(unsigned long i=5; i<LIMIT; i++) {
+void Atkin::printPrimes() const {
+	std::cout << "2 3 ";
+	for(unsigned long i=5; i<upperLimit; i++) {
 		if(primes[i]) {
-			printf("%lu ", i);
+			std::cout << i << " ";
 		}
 	}
+    std::cout << std::endl;
 }
 
-int main(int argc, char** argv) {
-	initPrimes();
-	calcPrimes();
-	printPrimes();
-	return 0;
+void Atkin::printCount() const{
+    int count = 2;
+    for(unsigned long i=5; i<upperLimit; i++) {
+		if(primes[i]) {
+			++count;
+		}
+	}
+    std::cout << "#primes = " << count << std::endl;
+}
+void Atkin::printTime() const{}
+Atkin::operator bool() const{
+    return false;
 }
