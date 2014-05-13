@@ -1,5 +1,4 @@
-usage:
-
+HOW TO BUILD:
 make sure you have cmake, make and gcc >= 4.8 installed!
 
 mkdir build
@@ -7,5 +6,16 @@ cd build
 cmake ..
 make
 
-example usage of resulting binary:
-../bin/primecheck 99991
+USAGE:
+../bin/primecheck [OPTIONS] UPPER_LIMIT
+
+CLONE THIS GIT:
+https://github.com/smogm/primeCheck.git
+
+COMMIT CHANGES:
+git add relative/path/to/changed/file
+git commit -m "message"
+git push origin master
+
+PULL CURRENT REVISION:
+git pull
