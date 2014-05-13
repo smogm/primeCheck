@@ -24,8 +24,8 @@ Atkin::~Atkin(){
 void Atkin::calcPrimes() {
     const unsigned long sqrtLimit = static_cast<unsigned long>(sqrt(upperLimit));
 	unsigned long n = 0;
-	for(unsigned int x=0; x<sqrtLimit; x++) {
-		for(unsigned int y=0; y<sqrtLimit; y++) {
+	for(unsigned int x=0; x<=sqrtLimit; x++) {
+		for(unsigned int y=0; y<=sqrtLimit; y++) {
 			n = 4*x*x+y*y;
 			if (n < upperLimit && (n%12 == 1 || n%12 == 5)) {
 				primes[n] = !primes[n];
@@ -44,7 +44,7 @@ void Atkin::calcPrimes() {
 		}
 	}
 
-	for(unsigned int n=5; n<sqrtLimit; n++) {
+	for(unsigned int n=5; n<=sqrtLimit; n++) {
 		if(primes[n]) {
 			for(unsigned long i=0, j=1; i<upperLimit; i=(j*pow(n, 2.0)), j++) {
 				primes[i] = false;
