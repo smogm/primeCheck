@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 	}
 
 	// example use case:
-	MillerRabin mr(n);
+	MillerRabin mr(n, 14);
 	std::cout << "calculating MillerRabin, stand by..." << std::endl;
 	mr.calcPrimes();
 	if (printLong)
