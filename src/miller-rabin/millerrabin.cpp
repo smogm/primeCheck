@@ -89,12 +89,6 @@ void MillerRabin::printPrimes() const
 		std::cout << prime << "\tis probably prime" << std::endl;
 	}
 
-	// print bases
-	std::cout << "checked with prime bases: ";
-	for (auto a : base)
-	{
-		std::cout << std::dec << a << " ";
-	}
 	std::cout << std::endl;
 }
 
