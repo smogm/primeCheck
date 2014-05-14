@@ -5,7 +5,23 @@
 
 class Atkin final : public BasePrime
 {
+public:
+    Atkin(unsigned long upperLimit);
+    virtual ~Atkin();
+    
+    virtual operator bool() const;
+    virtual void calcPrimes();
 
+    virtual void printPrimes() const;
+    virtual void printCount() const;
+    virtual void printTime() const;
+    
+private:
+    Atkin(const Atkin&);
+    Atkin& operator = (const Atkin&); 
+
+    bool* primes;
+    unsigned long upperLimit;
 };
 
 #endif
