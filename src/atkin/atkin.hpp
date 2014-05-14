@@ -22,6 +22,8 @@ private:
 
     bool* primes;
     unsigned long upperLimit;
+    std::chrono::milliseconds::rep initDurationMs;
+    std::chrono::milliseconds::rep lastCalcDurationMs;
 };
 
 #endif

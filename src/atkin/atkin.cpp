@@ -9,11 +9,16 @@
 Atkin::Atkin(unsigned long upperLimit)
     : primes(NULL)
     , upperLimit(upperLimit)
+    , initDurationMs(0)
+    , lastCalcDurationMs(0)
 {
+    start = std::chrono::steady_clock::now();
     primes = new bool[upperLimit];
 	for(unsigned long i=0; i<upperLimit; i++) {
 		primes[i] = false;
 	}
+    end = std::chrono::steady_clock::now();
+    initDurationMs = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 }
 
 Atkin::~Atkin(){
@@ -22,6 +27,7 @@ Atkin::~Atkin(){
 }
     
 void Atkin::calcPrimes() {
+    start = std::chrono::steady_clock::now();
     const unsigned long sqrtLimit = static_cast<unsigned long>(sqrt(upperLimit));
 	unsigned long n = 0;
 	for(unsigned int x=0; x<=sqrtLimit; x++) {
@@ -51,6 +57,8 @@ void Atkin::calcPrimes() {
 			}
 		}
 	}
+    end = std::chrono::steady_clock::now();
+    lastCalcDurationMs = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 }
 
 void Atkin::printPrimes() const {
@@ -72,7 +80,9 @@ void Atkin::printCount() const{
 	}
     std::cout << "#primes = " << count << std::endl;
 }
-void Atkin::printTime() const{}
+void Atkin::printTime() const{
+	std::cout << "Time spent=" << (initDurationMs+lastCalcDurationMs) << " ms. (init=" << (initDurationMs) << "ms calc=" << (lastCalcDurationMs) << "ms)" << std::endl;
+}
 Atkin::operator bool() const{
     return false;
 }
