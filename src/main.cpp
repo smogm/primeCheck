@@ -2,9 +2,11 @@
 #include <cstring> // strlen
 #include <cstdlib> // strtoul
 #include <climits> // ULONG_MAX
+#include <cerrno>
 
 #include <basePrime.hpp>
 #include <millerrabin.hpp>
+#include <atkin.hpp>
 
 static void printUsage(const char* const binname)
 {
@@ -13,6 +15,18 @@ static void printUsage(const char* const binname)
 	std::cout << std::endl;
 	std::cout << "OPTIONS are:" << std::endl;
 	std::cout << "   -p\tPrint generated prime numbers (time consuming!)" << std::endl;
+}
+
+static void runAlgorithm(BasePrime& algorithm, bool printLong)
+{
+	std::cout << "calculating " << algorithm.getName() << ", stand by..." << std::endl;
+	algorithm.calcPrimes();
+	if (printLong)
+	{
+		algorithm.printPrimes();
+	}
+	algorithm.printCount();
+	algorithm.printTime();
 }
 
 int main(int argc, char** argv)
@@ -53,16 +67,14 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	// example use case:
-	MillerRabin mr(n, 14);
-	std::cout << "calculating MillerRabin, stand by..." << std::endl;
-	mr.calcPrimes();
-	if (printLong)
-	{
-		mr.printPrimes();
-	}
-	mr.printCount();
-	mr.printTime();
+	// run all Algorithms
+    MillerRabin mr(n, 14);
+    runAlgorithm(mr, printLong);
+    
+	std::cout  << std::endl;
+    
+	Atkin atkin(n);
+    runAlgorithm(atkin, printLong);
 
 	return 0;
 }
