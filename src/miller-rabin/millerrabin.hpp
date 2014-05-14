@@ -12,6 +12,8 @@ class MillerRabin final : public BasePrime
 	//const unsigned char* mCheckLimit; // limit
 	//const unsigned char* mBase; // base
 	const unsigned long mCheckLimit;
+
+	const unsigned long mNumberOfBases;
 	
 	std::mutex mPrimeListMutex; // has to be locked for adding primes
 	std::vector<unsigned long> mPrimeList;
@@ -20,7 +22,7 @@ class MillerRabin final : public BasePrime
 	bool check(const unsigned long, const unsigned long) const;
 
 	public:
-			MillerRabin(unsigned long);
+			MillerRabin(unsigned long checkLimit, unsigned long numberOfBases);
 			virtual ~MillerRabin();
 
 			virtual explicit operator bool() const;

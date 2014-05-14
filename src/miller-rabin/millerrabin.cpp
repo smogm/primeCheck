@@ -1,13 +1,12 @@
 #include <iostream>
 
 #include <millerrabin.hpp>
+#include <stdlib.h>
 
-static const int NUM_BASES = 14;
-static const unsigned int base[NUM_BASES] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43 };
-
-MillerRabin::MillerRabin(unsigned long n) :
+MillerRabin::MillerRabin(unsigned long n, unsigned long numberOfBases) :
 	mIsValid(false),
 	mCheckLimit(n),
+	mNumberOfBases(numberOfBases),
 	mPrimeListMutex(),
 	mPrimeList()
 {
@@ -112,9 +111,10 @@ void MillerRabin::printTime() const
 void MillerRabin::calcPrimes()
 {
 	bool isPrime = false;
-	int i = 0;
+	unsigned int i = 0;
+	unsigned long base = 0;
 	mPrimeList.clear();
-	mPrimeList.push_back(1);
+
 	mPrimeList.push_back(2);
 
 	start = std::chrono::steady_clock::now();
@@ -129,8 +129,10 @@ void MillerRabin::calcPrimes()
 			// iterate the bases
 			do
 			{
-				isPrime = check(base[i++], n);
-			} while (i < NUM_BASES && isPrime);
+				base = rand() % (n - 1) + 1;
+				isPrime = check(base, n);
+				i++;
+			} while (i < mNumberOfBases && isPrime);
 
 			if (isPrime) // n passed the check
 			{
