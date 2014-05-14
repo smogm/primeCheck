@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <thread>
+#include <string>
 
 class BasePrime
 {
@@ -22,6 +23,7 @@ class BasePrime
 			virtual void printPrimes() const = 0;
 			virtual void printCount() const = 0;
 			virtual void printTime() const = 0;
+            virtual std::string getName() const = 0;
 };
 
 #endif

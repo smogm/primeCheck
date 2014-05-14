@@ -15,7 +15,8 @@ public:
     virtual void printPrimes() const;
     virtual void printCount() const;
     virtual void printTime() const;
-    
+    virtual std::string getName() const;
+  
 private:
     Atkin(const Atkin&);
     Atkin& operator = (const Atkin&); 

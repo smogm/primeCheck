@@ -139,3 +139,8 @@ void MillerRabin::calcPrimes()
 	}
 	end = std::chrono::steady_clock::now();
 }
+
+std::string MillerRabin::getName() const
+{
+    return "MillerRabin";
+}

@@ -31,6 +31,7 @@ class MillerRabin final : public BasePrime
 			virtual void printPrimes() const;
 			virtual void printCount() const;
 			virtual void printTime() const;
+            virtual std::string getName() const;
 };
 
 #endif
