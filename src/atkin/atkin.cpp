@@ -4,7 +4,8 @@
 
 #include <atkin.hpp>
 
-// TODO check for performance issues
+// DONE check for performance issues
+// TODO check for MORE performance issues
 
 Atkin::Atkin(unsigned long upperLimit)
     : primes(NULL)
@@ -31,19 +32,25 @@ void Atkin::calcPrimes() {
     const unsigned long sqrtLimit = static_cast<unsigned long>(sqrt(upperLimit));
 	unsigned long n = 0;
 	for(unsigned int x=0; x<=sqrtLimit; x++) {
+        const unsigned long xSquared = x*x;
+        const unsigned long threeTimesXSquared = 3*xSquared;
+        const unsigned long fourTimesXSquared = 4*xSquared;
 		for(unsigned int y=0; y<=sqrtLimit; y++) {
-			n = 4*x*x+y*y;
-			if (n < upperLimit && (n%12 == 1 || n%12 == 5)) {
+            const unsigned long ySquared = y*y;
+            
+			n = fourTimesXSquared+ySquared;
+            const unsigned long nModTwelve = n%12;
+			if (n < upperLimit && (nModTwelve == 1 || nModTwelve == 5)) {
 				primes[n] = !primes[n];
 			}
 			
-			n = 3*x*x+y*y;
+			n = threeTimesXSquared+ySquared;
 			if (n < upperLimit && n%12 == 7) {
 				primes[n] = !primes[n];
 			}
 			
 			
-			n = 3*x*x-y*y;
+			n = threeTimesXSquared-ySquared;
 			if (x > y && n < upperLimit && n%12 == 11) {
 				primes[n] = !primes[n];
 			}
@@ -52,8 +59,11 @@ void Atkin::calcPrimes() {
 
 	for(unsigned int n=5; n<=sqrtLimit; n++) {
 		if(primes[n]) {
-			for(unsigned long i=0, j=1; i<upperLimit; i=(j*pow(n, 2.0)), j++) {
-				primes[i] = false;
+            const unsigned long nSquared = n*n;
+            unsigned long multipleOfNSquared = nSquared;
+			while(multipleOfNSquared<upperLimit) {
+				primes[multipleOfNSquared] = false;
+                multipleOfNSquared += nSquared;
 			}
 		}
 	}
