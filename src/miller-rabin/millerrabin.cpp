@@ -1,18 +1,23 @@
 #include <iostream>
 
 #include <millerrabin.hpp>
-#include <stdlib.h>
+#include <cstdlib> // rand
+#include <math.h>
 
 MillerRabin::MillerRabin(unsigned long n, unsigned long numberOfBases) :
 	mIsValid(false),
 	mCheckLimit(n),
 	mNumberOfBases(numberOfBases),
+	mTypeBitSize(sizeof(unsigned long)*8), // !!!!!!!!
 	mPrimeListMutex(),
 	mPrimeList()
 {
 	std::cout << "available cores for concurrent jobs: " << getCoreCount() << std::endl;
+	std::cout << "check against " << mNumberOfBases << " bases" << std::endl;
+	std::cout << "ulong size: " << mTypeBitSize << " bits" << std::endl;
+
 	// nothing to do yet?
-	if (n > 2)
+	if (n > 2 && numberOfBases > 2)
 	{
 		mIsValid = true; // object created correctly
 	}
@@ -24,9 +29,9 @@ MillerRabin::~MillerRabin()
 
 unsigned long MillerRabin::expModulo(const unsigned long base, const unsigned long power, const unsigned long modulus) const
 {
-	unsigned long result = 1;
+	unsigned long result = 1; // take care of the bitsize!!
 
-	for (int i=15; i>=0; i--)
+	for (int i=(mTypeBitSize-1); i>=0; i--)
 	{
 		result = (result*result) % modulus;
 		if (power & (1 << i))
@@ -40,38 +45,30 @@ unsigned long MillerRabin::expModulo(const unsigned long base, const unsigned lo
 
 bool MillerRabin::check(const unsigned long base, const unsigned long pprime) const
 {
-	unsigned long a, s, d, i;
-	s = 0;
-	d = pprime - 1;
+	unsigned long a = base, s = 0, d = pprime - 1;
 	while ((d % 2) == 0)
 	{
 		d /= 2;
 		s++;
 	}
 
-#if defined(DEBUG)
-	std::cout << "base: " << std::dec << base << std::endl;
-	std::cout << "s: " << std::dec << s << std::endl;
-	std::cout << "d: " << std::dec << d << std::endl;
-#endif
-
+	// fermat
 	a = expModulo(base, d, pprime);
-	if (a == 1)
+	if ((a == 1) || (a == pprime - 1))
 	{
 		return true;
 	}
 
-	for(i=0; i < s-1; i++) {
-		if (a == pprime-1)
+	for(unsigned long r=1; r < s; r++) {
+		a = ((a * a) % pprime);
+		if (a == 1)
+		{
+			return false;
+		}
+		else if (a == pprime-1)
 		{
 			return true;
 		}
-		a = expModulo(a, 2, pprime);
-	}
-
-	if (a == pprime-1)
-	{
-		return true;
 	}
 
 	return false;
@@ -105,30 +102,42 @@ void MillerRabin::printTime() const
 void MillerRabin::calcPrimes()
 {
 	bool isPrime = false;
-	unsigned int i = 0;
+	unsigned long i = 0;
 	unsigned long base = 0;
 	mPrimeList.clear();
 
+	// TODO: check whether mCheckLimit is greater than this:
 	mPrimeList.push_back(2);
+	mPrimeList.push_back(3);
+	mPrimeList.push_back(5);
+	mPrimeList.push_back(7);
+	mPrimeList.push_back(11);
+	mPrimeList.push_back(13);
+	mPrimeList.push_back(17);
+	mPrimeList.push_back(19);
+	mPrimeList.push_back(23);
+	mPrimeList.push_back(29); // <--
 
 	start = std::chrono::steady_clock::now();
-	for (unsigned long n = 3; n <= mCheckLimit; n++)
+	// iterater all numbers we want to check
+	for (unsigned long n = mPrimeList[mPrimeList.size()-1]/*3*/; n <= mCheckLimit; n+=2)
 	{
-		// first check if n is odd
-		if ((n & 1) == 1)
-		{
-			isPrime = false;
-			i = 0;
+		isPrime = false;
+		i = 0;
 
+		if ((n % 3 != 0) && (n % 5 != 0) && (n % 7 != 0) && (n % 11 != 0) && (n % 13 != 0) && (n % 17 != 0) && (n % 19 !=0)
+			&& (n % 23 != 0) && (n %29 != 0))
+		{
 			// iterate the bases
 			do
 			{
-				base = rand() % (n - 1) + 1;
+				srand(i);
+				base = (rand() % (n - 1)) + 1;
 				isPrime = check(base, n);
 				i++;
 			} while (i < mNumberOfBases && isPrime);
 
-			if (isPrime) // n passed the check
+			if (isPrime) // n passed the check and seems to be prime
 			{
 				// lock for thread safety
 				mPrimeListMutex.lock();

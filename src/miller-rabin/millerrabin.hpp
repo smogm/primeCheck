@@ -14,7 +14,8 @@ class MillerRabin final : public BasePrime
 	const unsigned long mCheckLimit;
 
 	const unsigned long mNumberOfBases;
-	
+	const size_t mTypeBitSize;
+
 	std::mutex mPrimeListMutex; // has to be locked for adding primes
 	std::vector<unsigned long> mPrimeList;
 

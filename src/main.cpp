@@ -68,9 +68,12 @@ int main(int argc, char** argv)
 	}
 
 	// run all Algorithms
-    MillerRabin mr(n, 14);
-    runAlgorithm(mr, printLong);
-    
+    MillerRabin mr(n, 5);
+    if (mr)
+    {
+		runAlgorithm(mr, printLong);
+	}
+
 	std::cout  << std::endl;
     
 	Atkin atkin(n);
