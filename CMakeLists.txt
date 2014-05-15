@@ -3,7 +3,7 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 PROJECT (PrimeCheck CXX)
 
 SET (CMAKE_CXX_COMPILER "g++")
-SET (CMAKE_CXX_FLAGS "-Wall -Wextra -Weffc++ -std=c++11")
+SET (CMAKE_CXX_FLAGS "-Wall -Wextra -Weffc++ -std=c++11 -O2")
 
 SET (EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
 

@@ -2,6 +2,7 @@
 #define MILLERRABIN_HPP
 
 #include <basePrime.hpp>
+#include <thread>
 #include <mutex>
 #include <vector>
 #include <iostream>
@@ -14,14 +15,21 @@ class MillerRabin final : public BasePrime
 	//const unsigned char* mBase; // base
 	const unsigned long mCheckLimit;
 
-	const unsigned long mNumberOfBases;
+	const size_t mNumberOfBases;
 	const size_t mTypeBitSize;
+
+	const size_t mNumberOfThreads;
+	std::thread** mThread;
 
 	std::mutex mPrimeListMutex; // has to be locked for adding primes
 	std::vector<unsigned long> mPrimeList;
 
 	unsigned long expModulo(unsigned long, unsigned long, unsigned long) const;
 	bool check(const unsigned long, const unsigned long) const;
+
+	// disable copy and assignment
+	MillerRabin(const MillerRabin&) = delete;
+	const MillerRabin& operator=(const MillerRabin&) = delete;
 
 	public:
 			MillerRabin(unsigned long checkLimit, unsigned long numberOfBases);

@@ -4,17 +4,22 @@
 #include <cstdlib> // rand
 
 MillerRabin::MillerRabin(unsigned long n, unsigned long numberOfBases) :
-	BasePrime("MillerRabin"),
+	BasePrime("Miller-Rabin"),
 	mIsValid(false),
 	mCheckLimit(n),
 	mNumberOfBases(numberOfBases),
 	mTypeBitSize(sizeof(unsigned long)*8), // !!!!!!!!
+	mNumberOfThreads(getCoreCount()+1),
+	mThread(nullptr),
 	mPrimeListMutex(),
 	mPrimeList()
 {
 	std::cout << "available cores for concurrent jobs: " << getCoreCount() << std::endl;
 	std::cout << "check against " << mNumberOfBases << " bases" << std::endl;
 	std::cout << "ulong size: " << mTypeBitSize << " bits" << std::endl;
+
+	// TODO: check a condition for doing concurrent jobs?
+	mThread = new std::thread*[mNumberOfThreads];
 
 	// nothing to do yet?
 	if (n > 2 && numberOfBases > 2)
@@ -25,6 +30,17 @@ MillerRabin::MillerRabin(unsigned long n, unsigned long numberOfBases) :
 
 MillerRabin::~MillerRabin()
 {
+	if (mThread)
+	{
+		for (size_t i = 0; i < mNumberOfThreads; i++)
+		{
+			// TODO
+			mThread[i]->join();
+			delete mThread[i];
+		}
+		delete[] mThread;
+		mThread = nullptr;
+	}
 }
 
 unsigned long MillerRabin::expModulo(const unsigned long base, const unsigned long power, const unsigned long modulus) const
@@ -140,9 +156,9 @@ void MillerRabin::calcPrimes()
 			if (isPrime) // n passed the check and seems to be prime
 			{
 				// lock for thread safety
-				mPrimeListMutex.lock();
+				//mPrimeListMutex.lock();
 				mPrimeList.push_back(n);
-				mPrimeListMutex.unlock();
+				//mPrimeListMutex.unlock();
 			}
 		}
 	}
