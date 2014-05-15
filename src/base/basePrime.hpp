@@ -9,10 +9,11 @@ class BasePrime
 {
 	protected:
 		std::chrono::steady_clock::time_point start, end;
+		const std::string className;
 
 		unsigned int getCoreCount() const { return std::thread::hardware_concurrency(); }
 	public:
-			BasePrime() : start(), end() {};
+			BasePrime(const std::string className) : start(), end(), className(className) {};
 			virtual ~BasePrime() {};
 
 			/* pure virtuals */
@@ -23,7 +24,9 @@ class BasePrime
 			virtual void printPrimes() const = 0;
 			virtual void printCount() const = 0;
 			virtual void printTime() const = 0;
-            virtual std::string getName() const = 0;
+            //virtual std::string getName() const = 0;
+
+            friend std::ostream& operator<<(std::ostream&, const BasePrime&);
 };
 
 #endif

@@ -2,9 +2,9 @@
 
 #include <millerrabin.hpp>
 #include <cstdlib> // rand
-#include <math.h>
 
 MillerRabin::MillerRabin(unsigned long n, unsigned long numberOfBases) :
+	BasePrime("MillerRabin"),
 	mIsValid(false),
 	mCheckLimit(n),
 	mNumberOfBases(numberOfBases),
@@ -147,9 +147,4 @@ void MillerRabin::calcPrimes()
 		}
 	}
 	end = std::chrono::steady_clock::now();
-}
-
-std::string MillerRabin::getName() const
-{
-    return "MillerRabin";
 }

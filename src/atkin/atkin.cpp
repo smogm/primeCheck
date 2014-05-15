@@ -8,7 +8,8 @@
 // TODO check for MORE performance issues
 
 Atkin::Atkin(unsigned long upperLimit)
-    : primes(NULL)
+    : BasePrime("Atkin")
+    , primes(nullptr)
     , upperLimit(upperLimit)
     , initDurationMs(0)
     , lastCalcDurationMs(0)
@@ -93,9 +94,7 @@ void Atkin::printCount() const{
 void Atkin::printTime() const{
 	std::cout << "Time spent=" << (initDurationMs+lastCalcDurationMs) << " ms. (init=" << (initDurationMs) << "ms calc=" << (lastCalcDurationMs) << "ms)" << std::endl;
 }
-std::string Atkin::getName() const{
-    return "Atkin";
-}
+
 Atkin::operator bool() const{
     return false;
 }

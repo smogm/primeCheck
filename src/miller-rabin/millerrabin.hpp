@@ -4,6 +4,7 @@
 #include <basePrime.hpp>
 #include <mutex>
 #include <vector>
+#include <iostream>
 
 class MillerRabin final : public BasePrime
 {
@@ -32,7 +33,6 @@ class MillerRabin final : public BasePrime
 			virtual void printPrimes() const;
 			virtual void printCount() const;
 			virtual void printTime() const;
-            virtual std::string getName() const;
 };
 
 #endif

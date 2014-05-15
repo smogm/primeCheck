@@ -19,7 +19,7 @@ static void printUsage(const char* const binname)
 
 static void runAlgorithm(BasePrime& algorithm, bool printLong)
 {
-	std::cout << "calculating " << algorithm.getName() << ", stand by..." << std::endl;
+	std::cout << "calculating " << algorithm << ", stand by..." << std::endl;
 	algorithm.calcPrimes();
 	if (printLong)
 	{
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 	}
 
 	std::cout  << std::endl;
-    
+
 	Atkin atkin(n);
     runAlgorithm(atkin, printLong);
 
