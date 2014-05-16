@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 
 	std::cout  << std::endl;
 
-	Atkin atkin(n);
+    Atkin atkin(n);
     runAlgorithm(atkin, printLong);
 
 	return 0;

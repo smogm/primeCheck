@@ -16,7 +16,7 @@ MillerRabin::MillerRabin(unsigned long n, unsigned long numberOfBases) :
 {
 	std::cout << "available cores for concurrent jobs: " << getCoreCount() << std::endl;
 	std::cout << "check against " << mNumberOfBases << " bases" << std::endl;
-	std::cout << "ulong size: " << mTypeBitSize << " bits" << std::endl;
+    std::cout << "ulong size: " << mTypeBitSize << " bits" << std::endl << std::endl;
 
 	// TODO: check a condition for doing concurrent jobs?
 	mThread = new std::thread*[mNumberOfThreads];
@@ -75,7 +75,8 @@ bool MillerRabin::check(const unsigned long base, const unsigned long pprime) co
 		return true;
 	}
 
-	for(unsigned long r=1; r < s; r++) {
+    for(unsigned long r=1; r < s; r++)
+    {
 		a = ((a * a) % pprime);
 		if (a == 1)
 		{
@@ -117,8 +118,6 @@ void MillerRabin::printTime() const
 
 void MillerRabin::calcPrimes()
 {
-	bool isPrime = false;
-	unsigned long i = 0;
 	unsigned long base = 0;
 	mPrimeList.clear();
 
@@ -135,30 +134,39 @@ void MillerRabin::calcPrimes()
 	mPrimeList.push_back(29); // <--
 
 	start = std::chrono::steady_clock::now();
-	// iterater all numbers we want to check
-	for (unsigned long n = mPrimeList[mPrimeList.size()-1]/*3*/; n <= mCheckLimit; n+=2)
-	{
-		isPrime = false;
-		i = 0;
 
-		if ((n % 3 != 0) && (n % 5 != 0) && (n % 7 != 0) && (n % 11 != 0) && (n % 13 != 0) && (n % 17 != 0) && (n % 19 !=0)
-			&& (n % 23 != 0) && (n %29 != 0))
+	// iterater all numbers we want to check
+#if defined(USE_OPENMP)
+#pragma omp parallel for
+#endif
+    for (unsigned long n = mPrimeList[mPrimeList.size()-1]; n <= mCheckLimit; n+=2)
+	{
+        bool isPrime = false;   // inner declaration makes it private for each thread
+
+        if ((n % 3  != 0) && (n % 5  != 0) && (n % 7  != 0) && (n % 11 != 0) &&
+            (n % 13 != 0) && (n % 17 != 0) && (n % 19 != 0) && (n % 23 != 0) && (n %29 != 0))
 		{
+
 			// iterate the bases
-			do
+            for (unsigned long i = 0; i < mNumberOfBases; i++)
 			{
 				srand(i);
 				base = (rand() % (n - 1)) + 1;
 				isPrime = check(base, n);
-				i++;
-			} while (i < mNumberOfBases && isPrime);
+
+                if (!isPrime)
+                {
+                    break;
+                }
+
+            }
 
 			if (isPrime) // n passed the check and seems to be prime
 			{
 				// lock for thread safety
-				//mPrimeListMutex.lock();
+                mPrimeListMutex.lock();
 				mPrimeList.push_back(n);
-				//mPrimeListMutex.unlock();
+                mPrimeListMutex.unlock();
 			}
 		}
 	}

@@ -7,6 +7,8 @@
 #include <vector>
 #include <iostream>
 
+//#define USE_OPENMP
+
 class MillerRabin final : public BasePrime
 {
 	bool mIsValid;
