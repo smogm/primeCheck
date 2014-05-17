@@ -118,7 +118,7 @@ void MillerRabin::printTime() const
 
 void MillerRabin::calcPrimes()
 {
-	unsigned long base = 0;
+
 	mPrimeList.clear();
 
 	// TODO: check whether mCheckLimit is greater than this:
@@ -141,22 +141,61 @@ void MillerRabin::calcPrimes()
 #endif
     for (unsigned long n = mPrimeList[mPrimeList.size()-1]; n <= mCheckLimit; n+=2)
 	{
-        bool isPrime = false;   // inner declaration makes it private for each thread
+        // inner declaration makes it private for each thread
+        bool isPrime = true;
 
         if ((n % 3  != 0) && (n % 5  != 0) && (n % 7  != 0) && (n % 11 != 0) &&
             (n % 13 != 0) && (n % 17 != 0) && (n % 19 != 0) && (n % 23 != 0) && (n %29 != 0))
 		{
 
 			// iterate the bases
+            #if defined(USE_OPENMP)
+            #pragma omp parallel for
+            #endif
             for (unsigned long i = 0; i < mNumberOfBases; i++)
 			{
-				srand(i);
-				base = (rand() % (n - 1)) + 1;
-				isPrime = check(base, n);
+                unsigned long base = 0;
+                bool running = true;
+                bool isPrimeToBase;
 
-                if (!isPrime)
+                #if defined(USE_OPENMP)
+                #pragma omp critical(isPrimeVariable)
+                #endif
                 {
-                    break;
+                    // we use isPrime as indicator if we should go ahead with our base checks
+                    // if one thread found that n is not prime, running will be false
+                    // so all other threads would simply go through the remaining loop iterations without doing any work
+                    running = isPrime;
+                }
+
+                if (running)
+                {
+                    srand(i);
+                    base = (rand() % (n - 1)) + 1;
+
+                    isPrimeToBase = check(base, n);
+
+                    if (isPrimeToBase == false)
+                    {
+
+                        #if defined(USE_OPENMP)
+                        #pragma omp critical(isPrimeVariable)
+                        #endif
+                        {
+                            #if defined(DEBUG)
+                            std::cout << n << " is not prime to base " << base << " so, we're setting isPrime = false / base iteration i was: " << i << std::endl;
+                            #endif
+
+                            isPrime = false;
+                        }
+
+                    }
+                }
+                else
+                {
+                    #if defined(DEBUG)
+                    std::cout << n << " was already found not prime, so we're don't do any check in base iteration " << i << std::endl;
+                    #endif
                 }
 
             }
