@@ -1,6 +1,8 @@
 #include <iostream>
 
 #include <millerrabin.hpp>
+#include <millerrabinParallelBase.hpp>
+
 #include <cstdlib> // rand
 
 MillerRabin::MillerRabin(unsigned long n, unsigned long numberOfBases) :
@@ -10,8 +12,8 @@ MillerRabin::MillerRabin(unsigned long n, unsigned long numberOfBases) :
 	mNumberOfBases(numberOfBases),
 	mTypeBitSize(sizeof(unsigned long)*8), // !!!!!!!!
 	mNumberOfThreads(getCoreCount()+1),
-	mThread(nullptr),
-	mPrimeListMutex(),
+	mBase(nullptr),
+	mWorker(nullptr),
 	mPrimeList()
 {
 	std::cout << "available cores for concurrent jobs: " << getCoreCount() << std::endl;
@@ -19,7 +21,7 @@ MillerRabin::MillerRabin(unsigned long n, unsigned long numberOfBases) :
     std::cout << "ulong size: " << mTypeBitSize << " bits" << std::endl << std::endl;
 
 	// TODO: check a condition for doing concurrent jobs?
-	mThread = new std::thread*[mNumberOfThreads];
+	mWorker = new MillerRabinWorker<unsigned long>*[mNumberOfThreads];
 
 	// nothing to do yet?
 	if (n > 2 && numberOfBases > 2)
@@ -30,20 +32,16 @@ MillerRabin::MillerRabin(unsigned long n, unsigned long numberOfBases) :
 
 MillerRabin::~MillerRabin()
 {
-	if (mThread)
+	if (mWorker)
 	{
 		for (size_t i = 0; i < mNumberOfThreads; i++)
 		{
 			// TODO
-			if (mThread[i])
-			{
-				mThread[i]->join();
-				delete mThread[i];
-			}
+			delete mWorker[i];
 		}
-		delete[] mThread;
-		mThread = nullptr;
+		delete[] mWorker;
 	}
+	delete[] mBase;
 }
 
 unsigned long MillerRabin::expModulo(const unsigned long base, const unsigned long power, const unsigned long modulus) const
@@ -119,6 +117,143 @@ void MillerRabin::printTime() const
 	std::cout << "MillerRabin took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms." << std::endl;
 }
 
+/*
+ * parallelize bases
+ */
+void MillerRabin::calcPrimesParallelBase()
+{
+	std::thread** thread = new std::thread*[mNumberOfBases];
+	MillerRabinParallelBase** mrParallel = new MillerRabinParallelBase*[mNumberOfBases];
+	std::condition_variable cv;
+	std::mutex mutex;
+	size_t primes = 0;
+	size_t b = 0;
+	bool isPrime = false;
+
+	// prepare bases:
+	srand(mNumberOfBases);
+	// start the threads:
+	for (size_t i = 0; i < mNumberOfBases; i++)
+	{
+		mrParallel[i] = new MillerRabinParallelBase(cv, mutex, (rand() % (mCheckLimit - 1) + 1));
+		thread[i] = new std::thread(&MillerRabinParallelBase::run, mrParallel[i]);
+		// threads should initialize, start and immediately going to sleep
+	}
+    std::this_thread::sleep_for(std::chrono::milliseconds(200)); // be sure threads are ready
+
+	primes = 1; // for prime number 2
+	start = std::chrono::steady_clock::now();
+	for (unsigned long n = 3; n <= mCheckLimit; n+=2)
+	{
+		// load all threads:
+		for (b = 0; b < mNumberOfBases; b++)
+		{
+			mrParallel[b]->setParams(n);
+		}
+		cv.notify_all(); // wake them up!
+
+		isPrime = true;
+		b = 0;
+		do
+		{
+			if (!mrParallel[b]->getResult()) // this blocks!
+			{
+				isPrime = false;
+			}
+
+			b++;
+		} while (b < mNumberOfBases);
+
+		if (isPrime)
+		{
+			primes++;
+		}
+	}
+	end = std::chrono::steady_clock::now();
+
+	std::cout << "calculation finished, stopping threads..." << std::endl;
+	// terminate threads and clean up:
+	for (size_t i = 0; i < mNumberOfBases; i++)
+	{
+		mrParallel[i]->termThread();
+	}
+	cv.notify_all();
+
+	for (size_t i = 0; i < mNumberOfBases; i++)
+	{
+		thread[i]->join();
+		delete mrParallel[i];
+		delete thread[i];
+	}
+
+	delete[] thread;
+	delete[] mrParallel;
+
+	std::cout << "found primes: " << primes << std::endl;
+}
+
+void MillerRabin::calcPrimeParallel()
+{
+	if (mNumberOfThreads > 1) {
+		std::thread** thread = new std::thread*[mNumberOfThreads];
+		size_t blockSize = (mCheckLimit / mNumberOfThreads);
+		size_t remaining = (mCheckLimit - (blockSize * mNumberOfThreads));
+
+		unsigned long low = 0, high = blockSize;
+		size_t t = 0;
+
+		// prepare bases:
+		for (size_t i = 0; i < mNumberOfBases; i++)
+		{
+			srand(i);
+			mBase[i] = (rand() % (blockSize - 1)) + 1;
+			std::cout << "base: " << mBase[i] << std::endl;
+		}
+
+		start = std::chrono::steady_clock::now();
+		do
+		{
+			mWorker[t] = new MillerRabinWorker<unsigned long>(low, high, mBase, mNumberOfBases);
+			thread[t] = new std::thread(&MillerRabinWorker<unsigned long>::run, mWorker[t]);
+
+			t++;
+			// prepare for next loop:
+			low = high + 1;
+			high = low + blockSize -1;
+
+			if (t == (mNumberOfThreads - 1)) // is this the next thread the last thread?
+			{
+				// if it's the last, give it the remaining numbers
+				high += remaining;
+			}
+		} while(t < mNumberOfThreads);
+
+		std::cout << "waiting for threads..." << std::endl;
+		for (size_t i = 0; i < mNumberOfThreads; i++)
+		{
+			thread[i]->join();
+			std::cout << "thread returned!" << std::endl;
+		}
+		end = std::chrono::steady_clock::now();
+	}
+	else
+	{
+		// prepare bases:
+		for (size_t i = 0; i < mNumberOfBases; i++)
+		{
+			srand(i);
+			mBase[i] = (rand() % (mCheckLimit - 1)) + 1;
+		}
+
+		std::cout << "running single threaded!" << std::endl;
+		mWorker[0] = new MillerRabinWorker<unsigned long>(0, mCheckLimit, mBase, mNumberOfBases);
+		start = std::chrono::steady_clock::now();
+		mWorker[0]->run();
+		end = std::chrono::steady_clock::now();
+		// TODO...
+	}
+}
+
 void MillerRabin::calcPrimes()
 {
 
@@ -180,7 +315,6 @@ void MillerRabin::calcPrimes()
 
                     if (isPrimeToBase == false)
                     {
-
                         #if defined(USE_OPENMP)
                         #pragma omp critical(isPrimeVariable)
                         #endif
@@ -206,9 +340,7 @@ void MillerRabin::calcPrimes()
 			if (isPrime) // n passed the check and seems to be prime
 			{
 				// lock for thread safety
-                mPrimeListMutex.lock();
 				mPrimeList.push_back(n);
-                mPrimeListMutex.unlock();
 			}
 		}
 	}

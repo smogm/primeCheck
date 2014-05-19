@@ -66,6 +66,7 @@ void MillerRabinParallelBase::run()
 		{
 			mCv.wait(l1);
 		}
+		l1.unlock();
 
 		if (!mKeepRunning) // double check
 		{

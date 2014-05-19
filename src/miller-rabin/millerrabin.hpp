@@ -2,8 +2,9 @@
 #define MILLERRABIN_HPP
 
 #include <basePrime.hpp>
+#include <millerrabinWorker.hpp>
+
 #include <thread>
-#include <mutex>
 #include <vector>
 #include <iostream>
 
@@ -21,9 +22,10 @@ class MillerRabin final : public BasePrime
 	const size_t mTypeBitSize;
 
 	const size_t mNumberOfThreads;
-	std::thread** mThread;
+	unsigned long* const mBase;
 
-	std::mutex mPrimeListMutex; // has to be locked for adding primes
+	MillerRabinWorker<unsigned long>** mWorker;
+
 	std::vector<unsigned long> mPrimeList;
 
 	unsigned long expModulo(unsigned long, unsigned long, unsigned long) const;
@@ -38,6 +40,8 @@ class MillerRabin final : public BasePrime
 			virtual ~MillerRabin();
 
 			virtual explicit operator bool() const;
+			void calcPrimesParallelBase();
+			void calcPrimeParallel();
 			virtual void calcPrimes();
 
 			virtual void printPrimes() const;
