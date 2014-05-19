@@ -35,8 +35,11 @@ MillerRabin::~MillerRabin()
 		for (size_t i = 0; i < mNumberOfThreads; i++)
 		{
 			// TODO
-			mThread[i]->join();
-			delete mThread[i];
+			if (mThread[i])
+			{
+				mThread[i]->join();
+				delete mThread[i];
+			}
 		}
 		delete[] mThread;
 		mThread = nullptr;
