@@ -2,7 +2,7 @@
 #include <thread>
 #include <limits.h>
 #include <math.h>
-
+#include <cstdio>
 #include <atkinthreaded.hpp>
 
 // TODO check for performance issues

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <future>
 #include <vector>
+#include <cstdlib>
 
 MillerRabinParallelBases::MillerRabinParallelBases(const unsigned long n, const unsigned long numberOfBases) :
 	BasePrime("MillerRabinParallelBases"),

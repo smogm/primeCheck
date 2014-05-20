@@ -1,5 +1,6 @@
 #include <iostream>
 #include <future>
+#include <cstdlib>
 
 #include <millerRabinParallelPrimes.hpp>
 
