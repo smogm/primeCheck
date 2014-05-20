@@ -6,6 +6,7 @@
 
 #include <basePrime.hpp>
 #include <millerRabin.hpp>
+#include <millerRabinParallelPrimes.hpp>
 #include <atkin.hpp>
 #include <atkinthreaded.hpp>
 
@@ -69,18 +70,27 @@ int main(int argc, char** argv)
 	}
 
 	// run all Algorithms
-    MillerRabin mr(n, 5);
-    if (mr)
+    MillerRabin millerRabinNormal(n, 5);
+    if (millerRabinNormal)
     {
-		runAlgorithm(mr, printLong);
+		runAlgorithm(millerRabinNormal, printLong);
 	}
+	std::cout << "===========================" << std::endl;
+	std::cout << "===========================" << std::endl;
 
-	std::cout  << std::endl;
+    MillerRabinParallelPrimes millerRabinParallelPrimes(n, 5);
+    if (millerRabinParallelPrimes)
+    {
+		runAlgorithm(millerRabinParallelPrimes, printLong);
+	}
+	std::cout << "===========================" << std::endl;
+	std::cout << "===========================" << std::endl;
 
 	Atkin atkin(n);
 	runAlgorithm(atkin, printLong);
 
-	std::cout  << std::endl;
+	std::cout << "===========================" << std::endl;
+	std::cout << "===========================" << std::endl;
 
 	AtkinThreaded atkinThreaded(n);
 	runAlgorithm(atkinThreaded, printLong);

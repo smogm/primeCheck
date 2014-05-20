@@ -2,7 +2,6 @@
 #define MILLERRABIN_HPP
 
 #include <basePrime.hpp>
-#include <millerRabinWorker.hpp>
 #include <millerRabinBase.hpp>
 
 #include <thread>
@@ -23,9 +22,6 @@ class MillerRabin final : public BasePrime, public MillerRabinBase
 	const size_t mTypeBitSize;
 
 	const size_t mNumberOfThreads;
-	unsigned long* const mBase;
-
-	MillerRabinWorker<unsigned long>** mWorker;
 
 	std::vector<unsigned long> mPrimeList;
 
@@ -39,9 +35,8 @@ class MillerRabin final : public BasePrime, public MillerRabinBase
 
 			virtual explicit operator bool() const;
 			void calcPrimesParallelBase();
-			//void calcPrimeParallel();
+			
 			virtual void calcPrimes();
-
 			virtual void printPrimes() const;
 			virtual void printCount() const;
 			virtual void printTime() const;

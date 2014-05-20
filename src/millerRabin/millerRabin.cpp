@@ -13,16 +13,9 @@ MillerRabin::MillerRabin(unsigned long n, unsigned long numberOfBases) :
 	mNumberOfBases(numberOfBases),
 	mTypeBitSize(sizeof(unsigned long)*8), // !!!!!!!!
 	mNumberOfThreads(getCoreCount()+1),
-	mBase(nullptr),
-	mWorker(nullptr),
 	mPrimeList()
 {
-	std::cout << "available cores for concurrent jobs: " << getCoreCount() << std::endl;
 	std::cout << "check against " << mNumberOfBases << " bases" << std::endl;
-    std::cout << "ulong size: " << mTypeBitSize << " bits" << std::endl << std::endl;
-
-	// TODO: check a condition for doing concurrent jobs?
-	mWorker = new MillerRabinWorker<unsigned long>*[mNumberOfThreads];
 
 	// nothing to do yet?
 	if (n > 2 && numberOfBases > 2)
@@ -33,16 +26,7 @@ MillerRabin::MillerRabin(unsigned long n, unsigned long numberOfBases) :
 
 MillerRabin::~MillerRabin()
 {
-	if (mWorker)
-	{
-		for (size_t i = 0; i < mNumberOfThreads; i++)
-		{
-			// TODO
-			delete mWorker[i];
-		}
-		delete[] mWorker;
-	}
-	delete[] mBase;
+
 }
 
 MillerRabin::operator bool() const
@@ -67,7 +51,7 @@ void MillerRabin::printCount() const
 
 void MillerRabin::printTime() const
 {
-	std::cout << "MillerRabin took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms." << std::endl;
+	std::cout << *this << " took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms." << std::endl;
 }
 
 /*
@@ -174,7 +158,6 @@ void MillerRabin::calcPrimesParallelBase()
 
 void MillerRabin::calcPrimes()
 {
-	calcPrimesParallelBase();
 	mPrimeList.clear();
 
 	// TODO: check whether mCheckLimit is greater than this:
