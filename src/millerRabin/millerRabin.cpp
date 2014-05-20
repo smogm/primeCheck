@@ -7,7 +7,7 @@
 #include <cstdlib> // rand
 
 MillerRabin::MillerRabin(unsigned long n, unsigned long numberOfBases) :
-	BasePrime("Miller-Rabin"),
+	BasePrime("MillerRabin"),
 	mIsValid(false),
 	mCheckLimit(n),
 	mNumberOfBases(numberOfBases),
@@ -170,68 +170,6 @@ void MillerRabin::calcPrimesParallelBase()
 	delete[] mrParallel;
 
 	std::cout << "found primes: " << primes << std::endl;*/
-}
-
-void MillerRabin::calcPrimeParallel()
-{
-	if (mNumberOfThreads > 1) {
-		std::thread** thread = new std::thread*[mNumberOfThreads];
-		size_t blockSize = (mCheckLimit / mNumberOfThreads);
-		size_t remaining = (mCheckLimit - (blockSize * mNumberOfThreads));
-
-		unsigned long low = 0, high = blockSize;
-		size_t t = 0;
-
-		// prepare bases:
-		for (size_t i = 0; i < mNumberOfBases; i++)
-		{
-			srand(i);
-			mBase[i] = (rand() % (blockSize - 1)) + 1;
-			std::cout << "base: " << mBase[i] << std::endl;
-		}
-
-		start = std::chrono::steady_clock::now();
-		do
-		{
-			mWorker[t] = new MillerRabinWorker<unsigned long>(low, high, mBase, mNumberOfBases);
-			thread[t] = new std::thread(&MillerRabinWorker<unsigned long>::run, mWorker[t]);
-
-			t++;
-			// prepare for next loop:
-			low = high + 1;
-			high = low + blockSize -1;
-
-			if (t == (mNumberOfThreads - 1)) // is this the next thread the last thread?
-			{
-				// if it's the last, give it the remaining numbers
-				high += remaining;
-			}
-		} while(t < mNumberOfThreads);
-
-		std::cout << "waiting for threads..." << std::endl;
-		for (size_t i = 0; i < mNumberOfThreads; i++)
-		{
-			thread[i]->join();
-			std::cout << "thread returned!" << std::endl;
-		}
-		end = std::chrono::steady_clock::now();
-	}
-	else
-	{
-		// prepare bases:
-		for (size_t i = 0; i < mNumberOfBases; i++)
-		{
-			srand(i);
-			mBase[i] = (rand() % (mCheckLimit - 1)) + 1;
-		}
-
-		std::cout << "running single threaded!" << std::endl;
-		mWorker[0] = new MillerRabinWorker<unsigned long>(0, mCheckLimit, mBase, mNumberOfBases);
-		start = std::chrono::steady_clock::now();
-		mWorker[0]->run();
-		end = std::chrono::steady_clock::now();
-		// TODO...
-	}
 }
 
 void MillerRabin::calcPrimes()

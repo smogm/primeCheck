@@ -2,7 +2,7 @@
 #define MILLERRABIN_HPP
 
 #include <basePrime.hpp>
-#include <millerrabinWorker.hpp>
+#include <millerRabinWorker.hpp>
 #include <millerRabinBase.hpp>
 
 #include <thread>
@@ -39,7 +39,7 @@ class MillerRabin final : public BasePrime, public MillerRabinBase
 
 			virtual explicit operator bool() const;
 			void calcPrimesParallelBase();
-			void calcPrimeParallel();
+			//void calcPrimeParallel();
 			virtual void calcPrimes();
 
 			virtual void printPrimes() const;
