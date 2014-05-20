@@ -1,7 +1,8 @@
 #include <iostream>
+#include <future>
 
-#include <millerrabin.hpp>
-#include <millerrabinParallelBase.hpp>
+#include <millerRabin.hpp>
+#include <millerRabinParallelBase.hpp>
 
 #include <cstdlib> // rand
 
@@ -44,54 +45,6 @@ MillerRabin::~MillerRabin()
 	delete[] mBase;
 }
 
-unsigned long MillerRabin::expModulo(const unsigned long base, const unsigned long power, const unsigned long modulus) const
-{
-	unsigned long result = 1; // take care of the bitsize!!
-
-	for (int i=(mTypeBitSize-1); i>=0; i--)
-	{
-		result = (result*result) % modulus;
-		if (power & (1 << i))
-		{
-			result = (result*base) % modulus;
-		}
-	}
-
-	return result;
-}
-
-bool MillerRabin::check(const unsigned long base, const unsigned long pprime) const
-{
-	unsigned long a = base, s = 0, d = pprime - 1;
-	while ((d % 2) == 0)
-	{
-		d /= 2;
-		s++;
-	}
-
-	// fermat
-	a = expModulo(base, d, pprime);
-	if ((a == 1) || (a == pprime - 1))
-	{
-		return true;
-	}
-
-    for(unsigned long r=1; r < s; r++)
-    {
-		a = ((a * a) % pprime);
-		if (a == 1)
-		{
-			return false;
-		}
-		else if (a == pprime-1)
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
 MillerRabin::operator bool() const
 {
 	return mIsValid;
@@ -122,10 +75,39 @@ void MillerRabin::printTime() const
  */
 void MillerRabin::calcPrimesParallelBase()
 {
-	std::thread** thread = new std::thread*[mNumberOfBases];
+	std::future<std::vector<unsigned long>*> f[mNumberOfBases];
+	std::vector<unsigned long>* primeArray[mNumberOfBases];
+
+	start = std::chrono::steady_clock::now();
+	for (size_t i = 0; i < mNumberOfBases; i++)
+	{
+		unsigned long base = rand() % (mCheckLimit - 1) + 1;
+		f[i] = std::async(std::launch::async, [=]() {
+			std::vector<unsigned long>* primes = new std::vector<unsigned long>;
+
+			for (unsigned int n = 3; n < mCheckLimit; n+=2)
+			{
+				if (check(base, n))
+				{
+					//primes->push_back(n);
+				}
+			}
+
+			return primes;
+		});
+	}
+
+	for (size_t i = 0; i < mNumberOfBases; i++)
+	{
+		primeArray[i] = f[i].get();
+		std::cout << "found " << primeArray[i]->size() << " primes" << std::endl;
+		delete primeArray[i];
+	}
+	end = std::chrono::steady_clock::now();
+	std::cout << "calculation finished in " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms, stopping threads..." << std::endl;
+	
+	/*std::thread** thread = new std::thread*[mNumberOfBases];
 	MillerRabinParallelBase** mrParallel = new MillerRabinParallelBase*[mNumberOfBases];
-	std::condition_variable cv;
-	std::mutex mutex;
 	size_t primes = 0;
 	size_t b = 0;
 	bool isPrime = false;
@@ -135,22 +117,21 @@ void MillerRabin::calcPrimesParallelBase()
 	// start the threads:
 	for (size_t i = 0; i < mNumberOfBases; i++)
 	{
-		mrParallel[i] = new MillerRabinParallelBase(cv, mutex, (rand() % (mCheckLimit - 1) + 1));
+		mrParallel[i] = new MillerRabinParallelBase(rand() % (mCheckLimit - 1) + 1);
 		thread[i] = new std::thread(&MillerRabinParallelBase::run, mrParallel[i]);
 		// threads should initialize, start and immediately going to sleep
 	}
     std::this_thread::sleep_for(std::chrono::milliseconds(200)); // be sure threads are ready
 
-	primes = 1; // for prime number 2
+	primes = 10; // for prime numbers 2 ... 29
 	start = std::chrono::steady_clock::now();
-	for (unsigned long n = 3; n <= mCheckLimit; n+=2)
+	for (unsigned long n = 19; n <= mCheckLimit; n+=2)
 	{
 		// load all threads:
 		for (b = 0; b < mNumberOfBases; b++)
 		{
 			mrParallel[b]->setParams(n);
 		}
-		cv.notify_all(); // wake them up!
 
 		isPrime = true;
 		b = 0;
@@ -171,13 +152,12 @@ void MillerRabin::calcPrimesParallelBase()
 	}
 	end = std::chrono::steady_clock::now();
 
-	std::cout << "calculation finished, stopping threads..." << std::endl;
+	std::cout << "calculation finished in " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms, stopping threads..." << std::endl;
 	// terminate threads and clean up:
 	for (size_t i = 0; i < mNumberOfBases; i++)
 	{
 		mrParallel[i]->termThread();
 	}
-	cv.notify_all();
 
 	for (size_t i = 0; i < mNumberOfBases; i++)
 	{
@@ -189,7 +169,7 @@ void MillerRabin::calcPrimesParallelBase()
 	delete[] thread;
 	delete[] mrParallel;
 
-	std::cout << "found primes: " << primes << std::endl;
+	std::cout << "found primes: " << primes << std::endl;*/
 }
 
 void MillerRabin::calcPrimeParallel()
@@ -256,7 +236,7 @@ void MillerRabin::calcPrimeParallel()
 
 void MillerRabin::calcPrimes()
 {
-
+	calcPrimesParallelBase();
 	mPrimeList.clear();
 
 	// TODO: check whether mCheckLimit is greater than this:
