@@ -3,6 +3,7 @@
 
 #include <basePrime.hpp>
 #include <millerrabinWorker.hpp>
+#include <millerRabinBase.hpp>
 
 #include <thread>
 #include <vector>
@@ -10,7 +11,7 @@
 
 //#define USE_OPENMP
 
-class MillerRabin final : public BasePrime
+class MillerRabin final : public BasePrime, public MillerRabinBase
 {
 	bool mIsValid;
 	// preparation for bigger numbers:
@@ -27,9 +28,6 @@ class MillerRabin final : public BasePrime
 	MillerRabinWorker<unsigned long>** mWorker;
 
 	std::vector<unsigned long> mPrimeList;
-
-	unsigned long expModulo(unsigned long, unsigned long, unsigned long) const;
-	bool check(const unsigned long, const unsigned long) const;
 
 	// disable copy and assignment
 	MillerRabin(const MillerRabin&) = delete;

@@ -1,12 +1,13 @@
 #include <millerrabinParallelBase.hpp>
 #include <iostream>
 
-MillerRabinParallelBase::MillerRabinParallelBase(std::condition_variable& cv, std::mutex& mutex, const unsigned long base) :
+MillerRabinParallelBase::MillerRabinParallelBase(const unsigned long base) :
 	mIsPrime(false),
 	mWasSet(false),
+	mHasResult(false),
 	mKeepRunning(true),
-	mCv(cv),
-	mMutex(mutex),
+	mParamCv(),
+	mParamMutex(),
 	mResultCv(),
 	mResultMutex(),
 	mN(0),
@@ -17,19 +18,21 @@ MillerRabinParallelBase::MillerRabinParallelBase(std::condition_variable& cv, st
 
 void MillerRabinParallelBase::setParams(unsigned long n)
 {
+	//mParamMutex.lock();
 	mN = n;
-	mResultMutex.lock();
 	mWasSet = true;
-	mResultMutex.unlock();
+	//mParamMutex.unlock();
+	mParamCv.notify_one();
 }
 
 bool MillerRabinParallelBase::getResult()
 {
 	std::unique_lock<std::mutex> lock(mResultMutex);
-	while(mWasSet)
+	while(!mHasResult)
 	{
 		mResultCv.wait(lock);
 	}
+	mHasResult = false;
 
 	return mIsPrime;
 }
@@ -37,6 +40,7 @@ bool MillerRabinParallelBase::getResult()
 void MillerRabinParallelBase::termThread()
 {
 	mKeepRunning = false;
+	mParamCv.notify_one();
 }
 
 unsigned long MillerRabinParallelBase::expModulo(const unsigned long base, const unsigned long power, const unsigned long modulus) const
@@ -58,15 +62,15 @@ unsigned long MillerRabinParallelBase::expModulo(const unsigned long base, const
 void MillerRabinParallelBase::run()
 {
 	unsigned long a, s, d;
+	//std::vector<unsigned long> primes;
 
 	while(mKeepRunning)
 	{
-		std::unique_lock<std::mutex> l1(mMutex);
+		std::unique_lock<std::mutex> l1(mParamMutex);
 		while (!mWasSet && mKeepRunning)
 		{
-			mCv.wait(l1);
+			mParamCv.wait(l1);
 		}
-		l1.unlock();
 
 		if (!mKeepRunning) // double check
 		{
@@ -109,9 +113,10 @@ void MillerRabinParallelBase::run()
 
 		mIsPrime = false;
 cont:
+		mWasSet = false; // release setParams()
 		mResultMutex.lock();
-		mWasSet = false;
-		mResultCv.notify_one(); // unblocks getResult()
+		mHasResult = true;
 		mResultMutex.unlock();
+		mResultCv.notify_one(); // unblocks getResult()
 	}
 }

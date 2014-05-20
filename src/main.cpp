@@ -5,7 +5,7 @@
 #include <cerrno>
 
 #include <basePrime.hpp>
-#include <millerrabin.hpp>
+#include <millerRabin.hpp>
 #include <atkin.hpp>
 #include <atkinthreaded.hpp>
 

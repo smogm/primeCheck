@@ -12,16 +12,17 @@ class MillerRabinParallelBase final
 {
 	bool mIsPrime;
 	bool mWasSet;
+	bool mHasResult;
 	bool mKeepRunning;
-	std::condition_variable& mCv;
-	std::mutex& mMutex;
+	std::condition_variable mParamCv;
+	std::mutex mParamMutex;
 	std::condition_variable mResultCv;
 	std::mutex mResultMutex;
 	unsigned long mN;
 	const unsigned long mBase;
 
 	public:
-			MillerRabinParallelBase(std::condition_variable&, std::mutex&, const unsigned long base);
+			MillerRabinParallelBase(const unsigned long base);
 			void setParams(unsigned long n);
 			bool getResult(); // not const because of mutex locking
 			void termThread();
