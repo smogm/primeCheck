@@ -7,6 +7,7 @@
 #include <basePrime.hpp>
 #include <millerrabin.hpp>
 #include <atkin.hpp>
+#include <atkinthreaded.hpp>
 
 static void printUsage(const char* const binname)
 {
@@ -76,8 +77,13 @@ int main(int argc, char** argv)
 
 	std::cout  << std::endl;
 
-    Atkin atkin(n);
-    runAlgorithm(atkin, printLong);
+	Atkin atkin(n);
+	runAlgorithm(atkin, printLong);
 
+	std::cout  << std::endl;
+
+	AtkinThreaded atkinThreaded(n);
+	runAlgorithm(atkinThreaded, printLong);
+	 
 	return 0;
 }
