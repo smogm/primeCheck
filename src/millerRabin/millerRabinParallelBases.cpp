@@ -1,4 +1,4 @@
-#include <millerRabinParallelBase.hpp>
+#include <millerRabinParallelBases.hpp>
 #include <iostream>
 
 MillerRabinParallelBase::MillerRabinParallelBase(const unsigned long base) :
