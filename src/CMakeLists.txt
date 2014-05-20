@@ -11,7 +11,7 @@ ADD_SUBDIRECTORY(base)
 ADD_EXECUTABLE (primecheck main.cpp)
 
 # add libraries to exec
-TARGET_LINK_LIBRARIES(primecheck millerRabin atkin atkinthreaded basePrime)
+TARGET_LINK_LIBRARIES(primecheck millerRabin atkin atkinthreaded atkinthreadedvar2 basePrime)
 
 # needed for std::thread
 SET_TARGET_PROPERTIES(primecheck PROPERTIES LINK_FLAGS "-lpthread")

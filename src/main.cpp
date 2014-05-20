@@ -11,6 +11,7 @@
 
 #include <atkin.hpp>
 #include <atkinthreaded.hpp>
+#include <atkinthreadedvar2.hpp>
 
 static void printUsage(const char* const binname)
 {
@@ -104,6 +105,12 @@ int main(int argc, char** argv)
 
 	AtkinThreaded atkinThreaded(n);
 	runAlgorithm(atkinThreaded, printLong);
+
+	std::cout << "===========================" << std::endl;
+	std::cout << "===========================" << std::endl;
+
+	AtkinThreadedVar2 atkinThreadedvar2(n);
+	runAlgorithm(atkinThreadedvar2, printLong);
 	 
 	return 0;
 }
