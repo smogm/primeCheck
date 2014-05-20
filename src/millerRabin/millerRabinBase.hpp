@@ -7,6 +7,7 @@ class MillerRabinBase
 
 	protected:
 				virtual bool check(const unsigned long, const unsigned long) const;
+				virtual ~MillerRabinBase() {};
 };
 
 #endif
