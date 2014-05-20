@@ -4,7 +4,6 @@
 #include <basePrime.hpp>
 #include <millerRabinBase.hpp>
 
-#include <thread>
 #include <vector>
 #include <iostream>
 
@@ -34,8 +33,6 @@ class MillerRabin final : public BasePrime, public MillerRabinBase
 			virtual ~MillerRabin();
 
 			virtual explicit operator bool() const;
-			void calcPrimesParallelBase();
-			
 			virtual void calcPrimes();
 			virtual void printPrimes() const;
 			virtual void printCount() const;

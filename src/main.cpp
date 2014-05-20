@@ -7,6 +7,8 @@
 #include <basePrime.hpp>
 #include <millerRabin.hpp>
 #include <millerRabinParallelPrimes.hpp>
+#include <millerRabinParallelBases.hpp>
+
 #include <atkin.hpp>
 #include <atkinthreaded.hpp>
 
@@ -82,6 +84,14 @@ int main(int argc, char** argv)
     if (millerRabinParallelPrimes)
     {
 		runAlgorithm(millerRabinParallelPrimes, printLong);
+	}
+	std::cout << "===========================" << std::endl;
+	std::cout << "===========================" << std::endl;
+
+    MillerRabinParallelBases millerRabinParallelBases(n, 5);
+    if (millerRabinParallelBases)
+    {
+		runAlgorithm(millerRabinParallelBases, printLong);
 	}
 	std::cout << "===========================" << std::endl;
 	std::cout << "===========================" << std::endl;

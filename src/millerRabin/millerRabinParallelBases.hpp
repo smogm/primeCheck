@@ -1,35 +1,25 @@
 #ifndef MILLERRABINPARALLELBASE_HPP
 #define MILLERRABINPARALLELBASE_HPP
 
-#include <unistd.h> // write
-#include <cstdlib> // rand
-#include <cstring> // strlen
+#include <basePrime.hpp>
+#include <millerRabinBase.hpp>
 
-#include <condition_variable>
-#include <mutex>
-
-class MillerRabinParallelBase final
+class MillerRabinParallelBases final : public BasePrime, public MillerRabinBase
 {
-	bool mIsPrime;
-	bool mWasSet;
-	bool mHasResult;
-	bool mKeepRunning;
-	std::condition_variable mParamCv;
-	std::mutex mParamMutex;
-	std::condition_variable mResultCv;
-	std::mutex mResultMutex;
-	unsigned long mN;
-	const unsigned long mBase;
+	bool mIsValid;
+
+	const unsigned long mCheckLimit;
+	const size_t mNumberOfBases;
 
 	public:
-			MillerRabinParallelBase(const unsigned long base);
-			void setParams(unsigned long n);
-			bool getResult(); // not const because of mutex locking
-			void termThread();
+			MillerRabinParallelBases(const unsigned long, const unsigned long);
 
-			unsigned long expModulo(const unsigned long base, const unsigned long power, const unsigned long modulus) const;
-
-			void run();
+			virtual explicit operator bool() const;
+			
+			virtual void calcPrimes();
+			virtual void printPrimes() const;
+			virtual void printCount() const;
+			virtual void printTime() const;
 };
 
 #endif

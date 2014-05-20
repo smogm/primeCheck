@@ -1,122 +1,73 @@
 #include <millerRabinParallelBases.hpp>
 #include <iostream>
+#include <future>
+#include <vector>
 
-MillerRabinParallelBase::MillerRabinParallelBase(const unsigned long base) :
-	mIsPrime(false),
-	mWasSet(false),
-	mHasResult(false),
-	mKeepRunning(true),
-	mParamCv(),
-	mParamMutex(),
-	mResultCv(),
-	mResultMutex(),
-	mN(0),
-	mBase(base)
+MillerRabinParallelBases::MillerRabinParallelBases(const unsigned long n, const unsigned long numberOfBases) :
+	BasePrime("MillerRabinParallelBases"),
+	mIsValid(false),
+	mCheckLimit(n),
+	mNumberOfBases(numberOfBases)
 {
-	std::cout << "base: " << mBase << std::endl;
-}
+	std::cout << "check against " << mNumberOfBases << " bases" << std::endl;
 
-void MillerRabinParallelBase::setParams(unsigned long n)
-{
-	//mParamMutex.lock();
-	mN = n;
-	mWasSet = true;
-	//mParamMutex.unlock();
-	mParamCv.notify_one();
-}
-
-bool MillerRabinParallelBase::getResult()
-{
-	std::unique_lock<std::mutex> lock(mResultMutex);
-	while(!mHasResult)
+	// nothing to do yet?
+	if (n > 2 && numberOfBases > 2)
 	{
-		mResultCv.wait(lock);
+		mIsValid = true; // object created correctly
 	}
-	mHasResult = false;
-
-	return mIsPrime;
 }
 
-void MillerRabinParallelBase::termThread()
+MillerRabinParallelBases::operator bool() const
 {
-	mKeepRunning = false;
-	mParamCv.notify_one();
+	return mIsValid;
 }
 
-unsigned long MillerRabinParallelBase::expModulo(const unsigned long base, const unsigned long power, const unsigned long modulus) const
+void MillerRabinParallelBases::calcPrimes()
 {
-	unsigned long result = 1; // take care of the bitsize!!
+	std::future<std::vector<unsigned long>*> f[mNumberOfBases];
+	std::vector<unsigned long>* primeArray[mNumberOfBases];
 
-	for (int i=(64-1); i>=0; i--)
+	start = std::chrono::steady_clock::now();
+	for (size_t i = 0; i < mNumberOfBases; i++)
 	{
-		result = (result*result) % modulus;
-		if (power & (1 << i))
-		{
-			result = (result*base) % modulus;
-		}
-	}
+		unsigned long base = rand() % (mCheckLimit - 1) + 1;
+		f[i] = std::async(std::launch::async, [=]() {
+			std::vector<unsigned long>* primes = new std::vector<unsigned long>;
 
-	return result;
-}
-
-void MillerRabinParallelBase::run()
-{
-	unsigned long a, s, d;
-	//std::vector<unsigned long> primes;
-
-	while(mKeepRunning)
-	{
-		std::unique_lock<std::mutex> l1(mParamMutex);
-		while (!mWasSet && mKeepRunning)
-		{
-			mParamCv.wait(l1);
-		}
-
-		if (!mKeepRunning) // double check
-		{
-			return;
-		}
-
-		a = mBase;
-		s = 0;
-		d = mN - 1;
-
-		// CAUTION: d has to be > 1 !!!!
-		while ((d % 2) == 0)
-		{
-			d /= 2;
-			s++;
-		}
-
-		// fermat
-		a = expModulo(mBase, d, mN);
-		if ((a == 1) || (a == mN - 1))
-		{
-			mIsPrime = true;
-			goto cont;
-		}
-
-		for(unsigned long r=1; r < s; r++)
-		{
-			a = ((a * a) % mN);
-			if (a == 1)
+			for (unsigned int n = 3; n < mCheckLimit; n+=2)
 			{
-				mIsPrime = false;
-				goto cont;
+				if (check(base, n))
+				{
+					primes->push_back(n);
+				}
 			}
-			else if (a == mN-1)
-			{
-				mIsPrime = true;
-				goto cont;
-			}
-		}
 
-		mIsPrime = false;
-cont:
-		mWasSet = false; // release setParams()
-		mResultMutex.lock();
-		mHasResult = true;
-		mResultMutex.unlock();
-		mResultCv.notify_one(); // unblocks getResult()
+			return primes;
+		});
 	}
+
+	for (size_t i = 0; i < mNumberOfBases; i++)
+	{
+		primeArray[i] = f[i].get();
+		std::cout << "thread found " << primeArray[i]->size() << " primes" << std::endl;
+		delete primeArray[i];
+	}
+	end = std::chrono::steady_clock::now();
+	std::cout << "TODO: find a way to accumulate/adjust them!" << std::endl;
+}
+
+void MillerRabinParallelBases::printPrimes() const
+{
+	
+}
+
+void MillerRabinParallelBases::printCount() const
+{
+	
+}
+
+void MillerRabinParallelBases::printTime() const
+{
+	std::cout << *this << " took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms." << std::endl;
 }

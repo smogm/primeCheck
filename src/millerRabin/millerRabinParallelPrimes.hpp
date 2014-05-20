@@ -23,7 +23,7 @@ class MillerRabinParallelPrimes final : public BasePrime, public MillerRabinBase
 			MillerRabinParallelPrimes(unsigned long, unsigned long);
 			virtual ~MillerRabinParallelPrimes();
 
-			explicit operator bool() const;
+			virtual explicit operator bool() const;
 			virtual void calcPrimes();
 			virtual void printPrimes() const;
 			virtual void printCount() const;
