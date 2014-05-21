@@ -11,7 +11,6 @@ class MillerRabinParallelPrimes final : public BasePrime, public MillerRabinBase
 	const unsigned long mCheckLimit;
 	const size_t mNumberOfBases;
 	const size_t mNumberOfThreads;
-	unsigned long* const mBase;
 	size_t mNumberOfPrimes;
 
 	MillerRabinParallelPrimes(const MillerRabinParallelPrimes&) = delete;

@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <iostream>
+#include <mutex>
 
 //#define USE_OPENMP
 
@@ -22,7 +23,8 @@ class MillerRabin final : public BasePrime, public MillerRabinBase
 
 	const size_t mNumberOfThreads;
 
-	std::vector<unsigned long> mPrimeList;
+    size_t mNumberOfPrimes;
+    std::mutex mNumberOfPrimesMutex;
 
 	// disable copy and assignment
 	MillerRabin(const MillerRabin&) = delete;

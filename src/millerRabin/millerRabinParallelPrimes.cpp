@@ -8,9 +8,8 @@ MillerRabinParallelPrimes::MillerRabinParallelPrimes(unsigned long n, unsigned l
 	BasePrime("MillerRabinParallelPrimes"),
 	mIsValid(false),
 	mCheckLimit(n),
-	mNumberOfBases(numberOfBases),
-	mNumberOfThreads(getCoreCount()+1),
-	mBase(new unsigned long[mNumberOfThreads]),
+    mNumberOfBases(numberOfBases),
+    mNumberOfThreads(getCoreCount()+1),
 	mNumberOfPrimes(0)
 {
 	std::cout << "number of concurrent jobs: " << mNumberOfThreads << std::endl;
@@ -25,7 +24,7 @@ MillerRabinParallelPrimes::MillerRabinParallelPrimes(unsigned long n, unsigned l
 
 MillerRabinParallelPrimes::~MillerRabinParallelPrimes()
 {
-	delete[] mBase;
+
 }
 
 size_t MillerRabinParallelPrimes::threadFunction(const unsigned long mStart, const unsigned long mStop)
@@ -34,7 +33,8 @@ size_t MillerRabinParallelPrimes::threadFunction(const unsigned long mStart, con
 	size_t dummy;
 	bool isPrime = false;
 	size_t i = 0;
-	size_t numberOfPrimes = 1;
+    size_t numberOfPrimes = 0;
+    unsigned long base = 0;
 
 #if defined(DEBUG)
 	sprintf(output, "mStart: %lu\n", mStart);
@@ -62,7 +62,8 @@ size_t MillerRabinParallelPrimes::threadFunction(const unsigned long mStart, con
 		// iterate the bases
 		do
 		{
-			isPrime = check(mBase[i]+mStart, n);
+            base = (rand() % (n - 1)) + 1;
+            isPrime = check(base, n);
 			i++;
 		} while (i < mNumberOfBases && isPrime);
 
@@ -92,14 +93,6 @@ void MillerRabinParallelPrimes::calcPrimes()
 		unsigned long low = 0, high = blockSize;
 		size_t t = 0;
 
-		// prepare bases:
-		for (size_t i = 0; i < mNumberOfBases; i++)
-		{
-			srand(i);
-			mBase[i] = (rand() % (blockSize - 1)) + 1;
-			std::cout << "base: " << mBase[i] << std::endl;
-		}
-
 		start = std::chrono::steady_clock::now();
 		do
 		{
@@ -126,16 +119,9 @@ void MillerRabinParallelPrimes::calcPrimes()
 	}
 	else
 	{
-		// prepare bases:
-		for (size_t i = 0; i < mNumberOfBases; i++)
-		{
-			srand(i);
-			mBase[i] = (rand() % (mCheckLimit - 1)) + 1;
-		}
-
 		std::cout << "running single threaded!" << std::endl;
 		start = std::chrono::steady_clock::now();
-		threadFunction(0, mCheckLimit);
+        mNumberOfPrimes = threadFunction(0, mCheckLimit);
 		end = std::chrono::steady_clock::now();
 	}
 }
