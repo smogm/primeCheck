@@ -12,6 +12,7 @@
 #include <atkin.hpp>
 #include <atkinthreaded.hpp>
 #include <atkinthreadedvar2.hpp>
+#include <atkinthreadedatomic.hpp>
 
 static void printUsage(const char* const binname)
 {
@@ -112,6 +113,12 @@ int main(int argc, char** argv)
 
 	AtkinThreadedVar2 atkinThreadedvar2(n);
 	runAlgorithm(atkinThreadedvar2, printLong);
+	 
+	std::cout << "===========================" << std::endl;
+	std::cout << "===========================" << std::endl;
+
+	AtkinThreadedAtomic atkinThreadedatomic(n);
+	runAlgorithm(atkinThreadedatomic, printLong);
 	 
 	return 0;
 }
