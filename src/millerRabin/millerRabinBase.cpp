@@ -1,6 +1,6 @@
 #include <millerRabinBase.hpp>
 
-#if defined(___x86_64__)
+#if defined(__x86_64__)
 unsigned long MillerRabinBase::mul(unsigned long a, unsigned long factor, unsigned long modulus) const
 {
 	unsigned long q; // q = ⌊a b / m⌋
