@@ -32,13 +32,13 @@ void Atkin::calcPrimes() {
     start = std::chrono::steady_clock::now();
     const unsigned long sqrtLimit = static_cast<unsigned long>(sqrt(upperLimit));
 	unsigned long n = 0;
-	for(unsigned int x=0; x<=sqrtLimit; x++) {
-        const unsigned long xSquared = x*x;
+    unsigned long xSquared = 0;
+
+	for(unsigned int x=0; x<=sqrtLimit; xSquared = xSquared + 2*x + 1, x++) {
         const unsigned long threeTimesXSquared = 3*xSquared;
-        const unsigned long fourTimesXSquared = 4*xSquared;
-		for(unsigned int y=0; y<=sqrtLimit; y++) {
-            const unsigned long ySquared = y*y;
-            
+        const unsigned long fourTimesXSquared = xSquared<<2;
+        unsigned long ySquared = 0;
+		for(unsigned int y=0; y<=sqrtLimit; ySquared = ySquared + 2*y +1, y++) {
 			n = fourTimesXSquared+ySquared;
             const unsigned long nModTwelve = n%12;
 			if (n < upperLimit && (nModTwelve == 1 || nModTwelve == 5)) {
@@ -49,12 +49,13 @@ void Atkin::calcPrimes() {
 			if (n < upperLimit && n%12 == 7) {
 				primes[n] = !primes[n];
 			}
-			
-			
-			n = threeTimesXSquared-ySquared;
-			if (x > y && n < upperLimit && n%12 == 11) {
-				primes[n] = !primes[n];
-			}
+			if(x>y)
+            {
+                n = threeTimesXSquared-ySquared;
+                if (n < upperLimit && n%12 == 11) {
+                    primes[n] = !primes[n];
+                }
+            }
 		}
 	}
 
