@@ -1,5 +1,37 @@
 #include <millerRabinBase.hpp>
 
+#if defined(___x86_64__)
+unsigned long MillerRabinBase::mul(unsigned long a, unsigned long factor, unsigned long modulus) const
+{
+	unsigned long q; // q = ⌊a b / m⌋
+	unsigned long r; // r = a b mod m
+	asm volatile(
+	  "mulq %[factor];" // quad word multiplication rax = rax * factor
+	  "divq %[modulus];"
+	  : "=a"(q) /*rax output*/, "=d"(r) /*rdx output*/
+	  : "a"(a) /*rax input*/, [factor]"rm"(factor), [modulus]"rm"(modulus));
+	return r;
+}
+
+unsigned long MillerRabinBase::expModulo(const unsigned long base, const unsigned long power, const unsigned long modulus) const
+{
+   unsigned long r = 1;
+   unsigned long e = power;
+   unsigned long a = base;
+   for(; e; e >>= 1) {
+      if(e & 1)
+         r = mul(r, a, modulus);
+      a = mul(a, a, modulus);
+   }
+   return r;
+}
+#else
+#warning "not using asm multiplication!"
+unsigned long MillerRabinBase::mul(unsigned long a, unsigned long factor, unsigned long modulus) const
+{
+	return a * factor % modulus;
+}
+
 unsigned long MillerRabinBase::expModulo(const unsigned long base, const unsigned long power, const unsigned long modulus) const
 {
 	unsigned long result = 1; // take care of the bitsize!!
@@ -15,6 +47,7 @@ unsigned long MillerRabinBase::expModulo(const unsigned long base, const unsigne
 
 	return result;
 }
+#endif
 
 bool MillerRabinBase::check(const unsigned long base, const unsigned long pprime) const
 {
@@ -26,20 +59,23 @@ bool MillerRabinBase::check(const unsigned long base, const unsigned long pprime
 	}
 
 	// fermat
-	a = expModulo(base, d, pprime);
+	//a = expModulo(base, d, pprime);
+	a = expModulo(base % pprime, d, pprime);
 	if ((a == 1) || (a == pprime - 1))
 	{
 		return true;
 	}
 
-    for(unsigned long r=1; r < s; r++)
-    {
-		a = ((a * a) % pprime);
+	while(s-- > 1)
+	{
+		//a = (a * a % pprime);
+		a = mul(a, a, pprime);
 		if (a == 1)
 		{
 			return false;
 		}
-		else if (a == pprime-1)
+		
+		if (a == pprime-1)
 		{
 			return true;
 		}
