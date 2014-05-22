@@ -1,4 +1,4 @@
-#include <AtkinThreadedAtomic.hpp>
+#include <atkinthreadedatomic.hpp>
 #include <iostream>	
 #include <thread>
 #include <limits.h>
