@@ -67,7 +67,8 @@ void MillerRabin::calcPrimes()
         #if defined(USE_OPENMP)
         #pragma omp parallel for
         #endif
-        for (unsigned long i = 0; i < mNumberOfBases; i++)
+        //for (unsigned long i = 0; i < mNumberOfBases; i++)
+        for (unsigned long i = mNumberOfBases; i > 0; i--)
         {
             unsigned long base = 0;
             bool running = true;
@@ -116,10 +117,7 @@ void MillerRabin::calcPrimes()
 
         if (isPrime) // n passed the check and seems to be prime
         {
-            // lock for thread safety
-            mNumberOfPrimesMutex.lock();
-                mNumberOfPrimes++;
-            mNumberOfPrimesMutex.unlock();
+			mNumberOfPrimes++;
         }
 
 	}

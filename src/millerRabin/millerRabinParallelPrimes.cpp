@@ -57,15 +57,15 @@ size_t MillerRabinParallelPrimes::threadFunction(const unsigned long mStart, con
 	for (; n <= mStop; n+=2)
 	{
 		isPrime = false;
-		i = 0;
+		i = mNumberOfBases;
 
 		// iterate the bases
 		do
 		{
             base = (rand() % (n - 1)) + 1;
             isPrime = check(base, n);
-			i++;
-		} while (i < mNumberOfBases && isPrime);
+			i--;
+		} while (i > 0 && isPrime);
 
 		if (isPrime) // n passed the check and seems to be prime
 		{
@@ -91,27 +91,27 @@ void MillerRabinParallelPrimes::calcPrimes()
 		size_t remaining = (mCheckLimit - (blockSize * mNumberOfThreads));
 
 		unsigned long low = 0, high = blockSize;
-		size_t t = 0;
+		ssize_t t = mNumberOfThreads - 1;
 
 		start = std::chrono::steady_clock::now();
 		do
 		{
 			f[t] = std::async(std::launch::async, &MillerRabinParallelPrimes::threadFunction, this, low, high);
 
-			t++;
+			t--;
 			// prepare for next loop:
 			low = high + 1;
 			high = low + blockSize -1;
 
-			if (t == (mNumberOfThreads - 1)) // is this the next thread the last thread?
+			if (!(!!t)) // is this the next thread the last thread?
 			{
 				// if it's the last, give it the remaining numbers
 				high += remaining;
 			}
-		} while(t < mNumberOfThreads);
+		} while(t >= 0);
 
 		std::cout << "waiting for threads..." << std::endl;
-		for (size_t i = 0; i < mNumberOfThreads; i++)
+		for (ssize_t i = mNumberOfThreads - 1; i >= 0 ; i--)
 		{
 			mNumberOfPrimes += f[i].get();
 		}

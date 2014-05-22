@@ -3,6 +3,13 @@
 #if defined(__x86_64__)
 unsigned long MillerRabinBase::mul(unsigned long a, unsigned long factor, unsigned long modulus) const
 {
+	/*	resulting code:
+	 *    	48 89 f0             	mov    %rsi,%rax
+	 *    	48 f7 e2             	mul    %rdx
+	 *    	48 f7 f1             	div    %rcx
+	 *    	48 89 d0             	mov    %rdx,%rax
+	 *    	c3                  	retq
+	 */
 	unsigned long q; // q = ⌊a b / m⌋
 	unsigned long r; // r = a b mod m
 	asm volatile(
@@ -29,6 +36,14 @@ unsigned long MillerRabinBase::expModulo(const unsigned long base, const unsigne
 #warning "not using asm multiplication!"
 unsigned long MillerRabinBase::mul(unsigned long a, unsigned long factor, unsigned long modulus) const
 {
+	/*	resulting code:
+	 *    	48 0f af f2          	imul   %rdx,%rsi
+	 *    	31 d2                	xor    %edx,%edx
+	 *    	48 89 f0             	mov    %rsi,%rax
+	 *    	48 f7 f1             	div    %rcx
+	 *    	48 89 d0             	mov    %rdx,%rax
+	 *    	c3                   	retq
+	 */
 	return a * factor % modulus;
 }
 
