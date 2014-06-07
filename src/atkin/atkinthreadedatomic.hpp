@@ -15,6 +15,8 @@ public:
 	virtual void calcPrimes();
 	virtual void initForRange(unsigned long begin, unsigned long end);
 	virtual void calcPrimesForRange(unsigned int begin, unsigned int end);
+	void removeMultiplesThreads();
+	void removeMultiples(unsigned int begin, unsigned int end);
 
     virtual void printPrimes() const;
     virtual void printCount() const;
@@ -31,6 +33,8 @@ private:
     unsigned int numberOfThreads;
 	std::chrono::milliseconds::rep initDurationMs;
     std::chrono::milliseconds::rep lastCalcDurationMs;
+    std::chrono::milliseconds::rep calcPart1DurationMs;
+    std::chrono::milliseconds::rep calcPart2DurationMs;
 };
 
 #endif
