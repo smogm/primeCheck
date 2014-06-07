@@ -4,11 +4,13 @@
 
 #include <millerRabinParallelPrimes.hpp>
 
+static unsigned int base[3] = { 2, 7, 61 };
+
 MillerRabinParallelPrimes::MillerRabinParallelPrimes(unsigned long n, unsigned long numberOfBases) :
 	BasePrime("MillerRabinParallelPrimes"),
 	mIsValid(false),
 	mCheckLimit(n),
-    mNumberOfBases(numberOfBases),
+    mNumberOfBases(/*numberOfBases*/3),
     mNumberOfThreads(getCoreCount()+1),
 	mNumberOfPrimes(0)
 {
@@ -32,9 +34,8 @@ size_t MillerRabinParallelPrimes::threadFunction(const unsigned long mStart, con
 	char output[500];
 	size_t dummy;
 	bool isPrime = false;
-	size_t i = 0;
-    size_t numberOfPrimes = 0;
-    unsigned long base = 0;
+	ssize_t i = 0;
+	size_t numberOfPrimes = 0;
 
 #if defined(DEBUG)
 	sprintf(output, "mStart: %lu\n", mStart);
@@ -57,15 +58,15 @@ size_t MillerRabinParallelPrimes::threadFunction(const unsigned long mStart, con
 	for (; n <= mStop; n+=2)
 	{
 		isPrime = false;
-		i = mNumberOfBases;
+		i = mNumberOfBases-1;
 
 		// iterate the bases
 		do
 		{
-            base = (rand() % (n - 1)) + 1;
-            isPrime = check(base, n);
+			//base = (rand() % (n - 1)) + 1;
+			isPrime = check(base[i], n);
 			i--;
-		} while (i > 0 && isPrime);
+		} while (i >= 0 && isPrime);
 
 		if (isPrime) // n passed the check and seems to be prime
 		{
@@ -113,6 +114,7 @@ void MillerRabinParallelPrimes::calcPrimes()
 		std::cout << "waiting for threads..." << std::endl;
 		for (ssize_t i = mNumberOfThreads - 1; i >= 0 ; i--)
 		{
+			f[i].wait();
 			mNumberOfPrimes += f[i].get();
 		}
 		end = std::chrono::steady_clock::now();
