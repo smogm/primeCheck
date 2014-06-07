@@ -7,6 +7,7 @@
 #include <vector>
 #include <iostream>
 #include <mutex>
+#include <atomic>
 
 //#define USE_OPENMP
 
@@ -23,7 +24,9 @@ class MillerRabin final : public BasePrime, public MillerRabinBase
 
 	const size_t mNumberOfThreads;
 
-    size_t mNumberOfPrimes;
+    //size_t mNumberOfPrimes;
+
+    std::atomic_ullong mNumberOfPrimes;
     std::mutex mNumberOfPrimesMutex;
 
 	// disable copy and assignment

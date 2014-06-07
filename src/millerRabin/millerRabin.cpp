@@ -65,7 +65,7 @@ void MillerRabin::calcPrimes()
 
         // iterate the bases
         #if defined(USE_OPENMP)
-        #pragma omp parallel for
+        //#pragma omp parallel for
         #endif
         //for (unsigned long i = 0; i < mNumberOfBases; i++)
         for (unsigned long i = mNumberOfBases; i > 0; i--)
@@ -75,7 +75,7 @@ void MillerRabin::calcPrimes()
             bool isPrimeToBase;
 
             #if defined(USE_OPENMP)
-            #pragma omp critical(isPrimeVariable)
+            //#pragma omp critical(isPrimeVariable)
             #endif
             {
                 // we use isPrime as indicator if we should go ahead with our base checks
@@ -94,7 +94,7 @@ void MillerRabin::calcPrimes()
                 if (isPrimeToBase == false)
                 {
                     #if defined(USE_OPENMP)
-                    #pragma omp critical(isPrimeVariable)
+                    //#pragma omp critical(isPrimeVariable)
                     #endif
                     {
                         #if defined(DEBUG)
