@@ -9,7 +9,7 @@
 #include <mutex>
 #include <atomic>
 
-//#define USE_OPENMP
+#define USE_OPENMP
 
 class MillerRabin final : public BasePrime, public MillerRabinBase
 {
