@@ -70,11 +70,11 @@ void AtkinThreaded::startThreads() {
 	
 	printf("Starting threads for 4*x^2+y^2...\n");
 	for(i=0, j=0; i<=sqrtLimit && j<numberOfThreads; i+=stepSize, j++) {
-		printf("Starting thread %i: %i - %i\n", j, i, i+stepSize-1);
+		// printf("Starting thread %i: %i - %i\n", j, i, i+stepSize-1);
 		threads[j] = new std::thread(&AtkinThreaded::calcPrimesForRange1, this, i, i+stepSize-1);
 	}
 	if(lastStepSize != 0) {
-		printf("Starting last thread: %i - %i\n", i, i+lastStepSize);
+		// printf("Starting last thread: %i - %i\n", i, i+lastStepSize);
 		std::thread extraThread(&AtkinThreaded::calcPrimesForRange1, this, i, i+lastStepSize);
 		extraThread.join();
 	}
@@ -87,11 +87,11 @@ void AtkinThreaded::startThreads() {
 	
 	printf("Starting threads for 3*x^2+y^2...\n");
 	for(i=0, j=0; i<=sqrtLimit && j<numberOfThreads; i+=stepSize, j++) {
-		printf("Starting thread %i: %i - %i\n", j, i, i+stepSize-1);
+		// printf("Starting thread %i: %i - %i\n", j, i, i+stepSize-1);
 		threads[j] = new std::thread(&AtkinThreaded::calcPrimesForRange2, this, i, i+stepSize-1);
 	}
 	if(lastStepSize != 0) {
-		printf("Starting last thread: %i - %i\n", i, i+lastStepSize);
+		// printf("Starting last thread: %i - %i\n", i, i+lastStepSize);
 		std::thread extraThread(&AtkinThreaded::calcPrimesForRange2, this, i, i+lastStepSize);
 		extraThread.join();
 	}
@@ -102,11 +102,11 @@ void AtkinThreaded::startThreads() {
 	
 	printf("Starting threads for 3*x^2-y^2...\n");
 	for(i=0, j=0; i<=sqrtLimit && j<numberOfThreads; i+=stepSize, j++) {
-		printf("Starting thread %i: %i - %i\n", j, i, i+stepSize-1);
+		// printf("Starting thread %i: %i - %i\n", j, i, i+stepSize-1);
 		threads[j] = new std::thread(&AtkinThreaded::calcPrimesForRange3, this, i, i+stepSize-1);
 	}
 	if(lastStepSize != 0) {
-		printf("Starting last thread: %i - %i\n", i, i+lastStepSize);
+		// printf("Starting last thread: %i - %i\n", i, i+lastStepSize);
 		std::thread extraThread(&AtkinThreaded::calcPrimesForRange3, this, i, i+lastStepSize);
 		extraThread.join();
 	}

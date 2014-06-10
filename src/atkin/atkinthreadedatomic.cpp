@@ -14,6 +14,8 @@ AtkinThreadedAtomic::AtkinThreadedAtomic(unsigned long upperLimit)
     , numberOfThreads(getCoreCount())
 	, initDurationMs(0)
     , lastCalcDurationMs(0)
+	, calcPart1DurationMs(0)
+	, calcPart2DurationMs(0)
 {
 	//numberOfThreads *=3;
 	
@@ -66,18 +68,57 @@ void AtkinThreadedAtomic::calcPrimes() {
 	printf("Starting calcPrimes... (sqrtLimit=%li)\n", sqrtLimit);
 	startThreads();
 	
-	for(unsigned int n=5; n<=sqrtLimit; n++) {
+	end = std::chrono::steady_clock::now();
+	calcPart1DurationMs = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	start = std::chrono::steady_clock::now();
+
+	removeMultiplesThreads();
+
+	end = std::chrono::steady_clock::now();
+	calcPart2DurationMs = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	lastCalcDurationMs = calcPart1DurationMs + calcPart2DurationMs;
+}
+
+void AtkinThreadedAtomic::removeMultiplesThreads(){
+	unsigned int i;
+	unsigned int j;
+	unsigned int k;
+	unsigned int start = 5;
+	unsigned int end = sqrtLimit;
+	int numNumbers = (end - start + 1);
+	int numSlices=0;
+	for(i=1;i<numberOfThreads;++i){
+		numSlices += i*i;
+	}
+	int* stepBorders = new int[numberOfThreads+1];
+	stepBorders[0] = start;
+	for(i=1;i<numberOfThreads;++i){
+		stepBorders[i] = stepBorders[i-1] + static_cast<int>((static_cast<double>(numNumbers) / numSlices)*(i*i));
+	}
+	stepBorders[numberOfThreads] = end+1;
+
+	printf("Starting threads to remove multiples\n");
+    for(j=0; j<numberOfThreads; j++) {
+		threads[j] = new std::thread(&AtkinThreadedAtomic::removeMultiples, this, stepBorders[j], stepBorders[j+1]-1);
+	}
+	for(k=0; k<numberOfThreads; k++) {
+		threads[k]->join();
+		delete threads[k];
+	}
+	delete[] stepBorders;
+}
+
+void AtkinThreadedAtomic::removeMultiples(unsigned int begin, unsigned int end){
+	for(unsigned int n=begin; n<=end; n++) {
 		if(primes[n]) {
             const unsigned long nSquared = n*n;
             unsigned long multipleOfNSquared = nSquared;
 			while(multipleOfNSquared<upperLimit) {
 				primes[multipleOfNSquared] = false;
-               multipleOfNSquared += nSquared;
+				multipleOfNSquared += nSquared;
 			}
 		}
 	}
-	end = std::chrono::steady_clock::now();
-	lastCalcDurationMs = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 }
 
 void AtkinThreadedAtomic::startThreads() {
@@ -157,7 +198,12 @@ void AtkinThreadedAtomic::printCount() const{
     std::cout << "#primes = " << count << std::endl;
 }
 void AtkinThreadedAtomic::printTime() const{
-	std::cout << "Time spent=" << (initDurationMs+lastCalcDurationMs) << " ms. (init=" << (initDurationMs) << "ms calc=" << (lastCalcDurationMs) << "ms)" << std::endl;
+	std::cout << "Time spent=" << (initDurationMs+lastCalcDurationMs) << " ms. "
+	<< "(init=" << (initDurationMs) << "ms "
+	<< "calc=" << (lastCalcDurationMs) << "ms ("
+	<< "part1=" << calcPart1DurationMs
+	<< "part2=" << calcPart2DurationMs
+	<< "))" << std::endl;
 }
 
 AtkinThreadedAtomic::operator bool() const{
